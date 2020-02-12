@@ -1,6 +1,6 @@
 console.log("Welcome to Webcraft")
 
-// Create instance of simplex noise
+// Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
 const SEED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456890"
 let seed = ""
@@ -9,9 +9,10 @@ for (let s = 0; s < MAX_SEED_LENGTH; s++) {
     seed += SEED_CHARS[Math.round(Math.random() * SEED_CHARS.length)]
 }
 
-console.log(seed)
+console.log("Your seed is: " + seed)
 
-var simplex = new SimplexNoise()
+// Create instance of simplex noise using seed
+var simplex = new SimplexNoise(seed)
 
 // Set default scene size
 let width = 480
