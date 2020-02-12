@@ -2,6 +2,9 @@ console.log("Welcome to Webcraft")
 
 // Import packages
 import * as THREE from "./packages/three.module.js"
+import {
+    OrbitControls
+} from './packages/OrbitControls.js'
 import "./packages/simplex-noise.js"
 
 // Generate alphanumeric world seed
@@ -32,19 +35,32 @@ height = document.body.clientHeight
 // ************** //
 
 // Three.js scene
-let scene = new THREE.Scene();
+let scene = new THREE.Scene()
 // Three.js camera (FOV, Aspect Ratio, near clipping plain, far clipping plain)
-let camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+let camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
 
 // Setup renderer
-let renderer = new THREE.WebGLRenderer();
-renderer.setSize(width, height);
+let renderer = new THREE.WebGLRenderer()
+renderer.setSize(width, height)
 
 // Append renderer to body
-document.body.appendChild(renderer.domElement);
+document.body.appendChild(renderer.domElement)
+
+// Instance orbit controls
+let controls = new OrbitControls(camera, renderer.domElement)
+
+controls.enableDamping = true // an animation loop is required when either damping or auto-rotation are enabled
+controls.dampingFactor = 0.05
+
+controls.screenSpacePanning = false
+
+controls.minDistance = 5
+controls.maxDistance = 100
+
+controls.maxPolarAngle = Math.PI / 2
 
 // Setup skybox
-let loader = new THREE.CubeTextureLoader();
+let loader = new THREE.CubeTextureLoader()
 const texture = loader.load([
     '../resources/textures/skybox/px.png',
     '../resources/textures/skybox/nx.png',
@@ -52,52 +68,53 @@ const texture = loader.load([
     '../resources/textures/skybox/ny.png',
     '../resources/textures/skybox/pz.png',
     '../resources/textures/skybox/nz.png',
-]);
-scene.background = texture;
+])
+scene.background = texture
 
 
 // Create simple cube:
 // Create geometry
-let geometry = new THREE.BoxGeometry(3, 3, 3);
+let geometry = new THREE.BoxGeometry(3, 3, 3)
 // Create material
 let material = new THREE.MeshPhongMaterial({
     color: 0x00ff00
-});
+})
 // Create cube mesh
-let cube = new THREE.Mesh(geometry, material);
+let cube = new THREE.Mesh(geometry, material)
 // Add cube to scene
-scene.add(cube);
+scene.add(cube)
 
 // Add light to scene
-let light = new THREE.DirectionalLight(0xFFFFFF, 1);
-light.position.set(-1, 2, 4);
-scene.add(light);
+let light = new THREE.DirectionalLight(0xFFFFFF, 1)
+light.position.set(-1, 2, 4)
+scene.add(light)
 
-camera.position.z = 5;
+camera.position.z = 5
 
 // FPS counter
-var stats = new Stats();
-stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild(stats.dom);
+var stats = new Stats()
+stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom)
 
 // Render loop
 function render(time) {
-    time *= 0.001; // convert time to seconds
+    time *= 0.001 // convert time to seconds
 
-    stats.begin();
+    stats.begin()
 
-    cube.rotation.x = time;
-    cube.rotation.y = time;
+    cube.rotation.x = time
+    cube.rotation.y = time
 
     // Window resize
-    let canvas = renderer.domElement;
-    camera.aspect = canvas.clientWidth / canvas.clientHeight;
-    camera.updateProjectionMatrix();
+    let canvas = renderer.domElement
+    camera.aspect = canvas.clientWidth / canvas.clientHeight
+    camera.updateProjectionMatrix()
 
-    requestAnimationFrame(render);
-    renderer.render(scene, camera);
+    requestAnimationFrame(render)
+    controls.update()
+    renderer.render(scene, camera)
 
-    stats.end();
+    stats.end()
 }
 
 // ************** //
@@ -111,4 +128,4 @@ function generate() {
 
 
 // Start render loop
-render();
+render()
