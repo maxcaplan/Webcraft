@@ -7,6 +7,8 @@ import {
 } from './packages/OrbitControls.js'
 import "./packages/simplex-noise.js"
 
+let cubes = []
+
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
 const SEED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456890"
@@ -49,47 +51,36 @@ document.body.appendChild(renderer.domElement)
 // Instance orbit controls
 let controls = new OrbitControls(camera, renderer.domElement)
 
-controls.enableDamping = true // an animation loop is required when either damping or auto-rotation are enabled
+controls.enableDamping = true
 controls.dampingFactor = 0.05
 
 controls.screenSpacePanning = false
 
-controls.minDistance = 5
+controls.minDistance = 1
 controls.maxDistance = 100
 
-controls.maxPolarAngle = Math.PI / 2
+controls.maxPolarAngle = Math.PI
 
 // Setup skybox
-let loader = new THREE.CubeTextureLoader()
-const texture = loader.load([
-    '../resources/textures/skybox/px.png',
-    '../resources/textures/skybox/nx.png',
-    '../resources/textures/skybox/py.png',
-    '../resources/textures/skybox/ny.png',
-    '../resources/textures/skybox/pz.png',
-    '../resources/textures/skybox/nz.png',
+let skyLoader = new THREE.CubeTextureLoader()
+skyLoader.setPath("../resources/textures/skybox/")
+const skybox = skyLoader.load([
+    'px.png',
+    'nx.png',
+    'py.png',
+    'ny.png',
+    'pz.png',
+    'nz.png',
 ])
-scene.background = texture
+scene.background = skybox
 
-
-// Create simple cube:
-// Create geometry
-let geometry = new THREE.BoxGeometry(3, 3, 3)
-// Create material
-let material = new THREE.MeshPhongMaterial({
-    color: 0x00ff00
-})
-// Create cube mesh
-let cube = new THREE.Mesh(geometry, material)
-// Add cube to scene
-scene.add(cube)
 
 // Add light to scene
 let light = new THREE.DirectionalLight(0xFFFFFF, 1)
-light.position.set(-1, 2, 4)
+light.position.set(-10, 10, 4)
 scene.add(light)
 
-camera.position.z = 5
+camera.position.z = 10
 
 // FPS counter
 var stats = new Stats()
@@ -101,9 +92,6 @@ function render(time) {
     time *= 0.001 // convert time to seconds
 
     stats.begin()
-
-    cube.rotation.x = time
-    cube.rotation.y = time
 
     // Window resize
     let canvas = renderer.domElement
@@ -123,9 +111,60 @@ function render(time) {
 
 // Test world gen function
 function generate() {
+    // Texture loader
+    let loader = new THREE.TextureLoader();
+    loader.setPath("../resources/textures/blocks/")
 
+    // Load side, top, and bottom texture
+    let sideTex = loader.load('grass_block_side.png')
+    let topTex = loader.load('grass_block_top_green.png')
+    let botTex = loader.load('dirt.png')
+
+    // Remove re-sampling filter
+    sideTex.magFilter = THREE.NearestFilter
+    topTex.magFilter = THREE.NearestFilter
+    botTex.magFilter = THREE.NearestFilter
+
+    // Create materials
+    let materials = [
+        new THREE.MeshBasicMaterial({
+            map: sideTex
+        }),
+        new THREE.MeshBasicMaterial({
+            map: sideTex
+        }),
+        new THREE.MeshBasicMaterial({
+            map: topTex
+        }),
+        new THREE.MeshBasicMaterial({
+            map: botTex
+        }),
+        new THREE.MeshBasicMaterial({
+            map: sideTex
+        }),
+        new THREE.MeshBasicMaterial({
+            map: sideTex
+        }),
+    ];
+
+
+    for (let z = 0; z < 10; z++) {
+        for (let x = 0; x < 10; x++) {
+            let val = Math.round((simplex.noise2D(x, z) + 1) / 2 * 255)
+
+            let geometry = new THREE.BoxGeometry(1, 1, 1)
+
+            let cube = new THREE.Mesh(geometry, materials)
+
+            cube.position.x = x - 4.5
+            cube.position.z = z - 4.5
+
+            scene.add(cube)
+        }
+    }
 }
 
+generate()
 
 // Start render loop
 render()
