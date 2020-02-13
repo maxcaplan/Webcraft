@@ -7,7 +7,12 @@ import {
 } from './packages/OrbitControls.js'
 import "./packages/simplex-noise.js"
 
-let cubes = []
+
+// Import classes
+import Blocks from "./classes/block.js"
+import Chunk from "./classes/chunk.js"
+import Block from "./classes/block.js"
+
 
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
@@ -122,7 +127,7 @@ function generate() {
     let width = 16  
     let depth = 16
 
-    let genHeight = 10
+    let genHeight = 20
     let genSize = 0.01
 
     // Texture loader
@@ -134,47 +139,14 @@ function generate() {
     let topTex = loader.load('grass_block_top_green.png')
     let botTex = loader.load('dirt.png')
 
-    // Remove re-sampling filter
-    sideTex.magFilter = THREE.NearestFilter
-    topTex.magFilter = THREE.NearestFilter
-    botTex.magFilter = THREE.NearestFilter
-
-    // Create materials
-    let materials = [
-        new THREE.MeshBasicMaterial({
-            map: sideTex
-        }),
-        new THREE.MeshBasicMaterial({
-            map: sideTex
-        }),
-        new THREE.MeshBasicMaterial({
-            map: topTex
-        }),
-        new THREE.MeshBasicMaterial({
-            map: botTex
-        }),
-        new THREE.MeshBasicMaterial({
-            map: sideTex
-        }),
-        new THREE.MeshBasicMaterial({
-            map: sideTex
-        }),
-    ];
-
 
     for (let z = 0; z < depth; z++) {
         for (let x = 0; x < width; x++) {
             let val = Math.round((simplex.noise2D(x * genSize, z * genSize)) * genHeight)
 
-            let geometry = new THREE.BoxGeometry(1, 1, 1)
+            let block = new Block(x - width/2, val, z - depth/2, 1, [sideTex, topTex, botTex])
 
-            let cube = new THREE.Mesh(geometry, materials)
-
-            cube.position.x = x - width / 2
-            cube.position.z = z - depth / 2
-            cube.position.y = val
-
-            scene.add(cube)
+            scene.add(block.generateMesh())
         }
     }
 }
