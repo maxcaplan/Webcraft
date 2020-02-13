@@ -11,7 +11,22 @@ export default class Block {
     }
 
     generateMesh() {
+        // var geometry = new THREE.BufferGeometry();
         let geometry = new THREE.BoxGeometry()
+
+        // var vertices = new Float32Array([
+        //     -1.0, -1.0, 1.0,
+        //     1.0, -1.0, 1.0,
+        //     1.0, 1.0, 1.0,
+
+        //     1.0, 1.0, 1.0,
+        //     -1.0, 1.0, 1.0,
+        //     -1.0, -1.0, 1.0
+        // ]);
+
+        // geometry.addGroup()
+        // var material = new THREE.MeshStandardMaterial( { color: 0xff0000 } );
+
         let cube = new THREE.Mesh(geometry, this.material)
 
         cube.position.x = this.x
@@ -25,7 +40,7 @@ export default class Block {
         if (!Array.isArray(texture)) {
             // Single Texture
             texture.magFilter = THREE.NearestFilter
-            return new THREE.MeshBasicMaterial({
+            return new THREE.MeshStandardMaterial({
                 map: texture
             })
         } else {
@@ -41,22 +56,22 @@ export default class Block {
                 bot.magFilter = THREE.NearestFilter
 
                 return [
-                    new THREE.MeshBasicMaterial({
+                    new THREE.MeshStandardMaterial({
                         map: side
                     }),
-                    new THREE.MeshBasicMaterial({
+                    new THREE.MeshStandardMaterial({
                         map: side
                     }),
-                    new THREE.MeshBasicMaterial({
+                    new THREE.MeshStandardMaterial({
                         map: top
                     }),
-                    new THREE.MeshBasicMaterial({
+                    new THREE.MeshStandardMaterial({
                         map: bot
                     }),
-                    new THREE.MeshBasicMaterial({
+                    new THREE.MeshStandardMaterial({
                         map: side
                     }),
-                    new THREE.MeshBasicMaterial({
+                    new THREE.MeshStandardMaterial({
                         map: side
                     }),
                 ]
@@ -66,7 +81,7 @@ export default class Block {
                 for (let i = 0; i < texture.length; i++) {
                     texture[i].magFilter = THREE.NearestFilter
                     mats.push(
-                        new THREE.MeshBasicMaterial({
+                        new THREE.MeshStandardMaterial({
                             map: texture[i]
                         }))
                 }

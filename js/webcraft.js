@@ -13,7 +13,6 @@ import Blocks from "./classes/block.js"
 import Chunk from "./classes/chunk.js"
 import Block from "./classes/block.js"
 
-
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
 const SEED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456890"
@@ -29,8 +28,8 @@ console.log("Your seed is: " + seed)
 let simplex = new SimplexNoise(seed)
 
 // Set default scene size
-let width = 480
-let height = 270
+let width = 780
+let height = 580
 
 // Set scene size to match body
 width = document.body.clientWidth
@@ -87,13 +86,19 @@ const skybox = skyLoader.load([
 scene.background = skybox
 
 
-// Add light to scene
-let light = new THREE.DirectionalLight(0xFFFFFF, 1)
-light.position.set(-10, 10, 4)
-scene.add(light)
+// Add lights to scene
+let dirLight = new THREE.DirectionalLight(0xFFFFFF, 1)
+dirLight.position.set(-10, 10, 4)
+scene.add(dirLight)
+
+var ambLight = new THREE.AmbientLight(0x404040); // soft white light
+scene.add(ambLight);
 
 camera.position.z = 10
 camera.rotation.y = 45 * Math.PI / 180
+
+// Add fog to scene
+scene.fog = new THREE.FogExp2( 0x96D1FF, 0.025 );
 
 // FPS counter
 var stats = new Stats()
@@ -118,56 +123,33 @@ function render(time) {
     stats.end()
 }
 
-// ************** //
-// Game Functions //
-// ************** //
 
-// Test world gen function
-// function generate() {
-//     let width = 16  
-//     let depth = 16
-
-//     let genHeight = 20
-//     let genSize = 0.01
-
-//     // Texture loader
-//     let loader = new THREE.TextureLoader();
-//     loader.setPath("../resources/textures/blocks/")
-
-//     // Load side, top, and bottom texture
-//     let sideTex = loader.load('grass_block_side.png')
-//     let topTex = loader.load('grass_block_top_green.png')
-//     let botTex = loader.load('dirt.png')
-
-
-//     for (let z = 0; z < depth; z++) {
-//         for (let x = 0; x < width; x++) {
-//             let val = Math.round((simplex.noise2D(x * genSize, z * genSize)) * genHeight)
-
-//             let block = new Block(x - width/2, val, z - depth/2, 1, [sideTex, topTex, botTex])
-
-//             scene.add(block.generateMesh())
-//         }
-//     }
-// }
-
-// generate()
-
+// Test multi chunk gen
 let chunks = [
-    new Chunk(0, 0, simplex, 10, 0.01),
-    new Chunk(1, 0, simplex, 10, 0.01),
-    new Chunk(1, 1, simplex, 10, 0.01),
-    new Chunk(0, 1, simplex, 10, 0.01)
+    new Chunk(0, 0, 24, simplex, 10, 0.01),
+    // new Chunk(1, 0, simplex, 10, 0.01),
+    // new Chunk(1, 1, simplex, 10, 0.01),
+    // new Chunk(0, 1, simplex, 10, 0.01)
 ]
 
 chunks.forEach(chunk => {
     let chunkMesh = chunk.generateMesh()
 
     chunkMesh.forEach(block => {
-        console.log(block)
         scene.add(block)
     })
 })
+
+// let loader = new THREE.TextureLoader();
+// loader.setPath("../resources/textures/blocks/")
+
+// // Load side, top, and bottom texture
+// let sideTex = loader.load('grass_block_side.png')
+// let topTex = loader.load('grass_block_top_green.png')
+// let botTex = loader.load('dirt.png')
+
+// let testBlock = new Block(0, 0, 0, 1, [sideTex, topTex, botTex])
+// scene.add(testBlock.generateMesh())
 
 // Start render loop
 render()

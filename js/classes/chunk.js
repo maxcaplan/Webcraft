@@ -2,10 +2,11 @@ import * as THREE from "../packages/three.module.js"
 import Block from "./block.js"
 
 export default class Chunk {
-    constructor(X, Z, simplex, genHeight, genSize) {
+    constructor(X, Z, chunkDepth, simplex, genHeight, genSize) {
         // Instantiation Values
         this.globalX = X
         this.globalZ = Z
+        this.chunkDepth = chunkDepth
         this.simplex = simplex
         this.genHeight = genHeight
         this.genSize = genSize
@@ -33,9 +34,15 @@ export default class Chunk {
                 let X = x + (this.globalX * this.size) - this.size / 2
                 let Z = z + (this.globalZ * this.size) - this.size / 2
 
-                let Y = Math.round((this.simplex.noise2D(X * this.genSize, Z * this.genSize)) * this.genHeight)
-
-                this.blocks.push(new Block(X, Y, Z, 1, [sideTex, topTex, botTex]))
+                let height = Math.round((this.simplex.noise2D(X * this.genSize, Z * this.genSize)) * this.genHeight)
+                for (let y = 0; y < 3; y++) {
+                    let Y = height - y
+                    if (y == 0) {
+                        this.blocks.push(new Block(X, Y, Z, 1, [sideTex, topTex, botTex]))
+                    } else {
+                        this.blocks.push(new Block(X, Y, Z, 1, botTex))
+                    }
+                }
             }
         }
     }
