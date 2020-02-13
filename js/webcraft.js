@@ -123,35 +123,51 @@ function render(time) {
 // ************** //
 
 // Test world gen function
-function generate() {
-    let width = 16  
-    let depth = 16
+// function generate() {
+//     let width = 16  
+//     let depth = 16
 
-    let genHeight = 20
-    let genSize = 0.01
+//     let genHeight = 20
+//     let genSize = 0.01
 
-    // Texture loader
-    let loader = new THREE.TextureLoader();
-    loader.setPath("../resources/textures/blocks/")
+//     // Texture loader
+//     let loader = new THREE.TextureLoader();
+//     loader.setPath("../resources/textures/blocks/")
 
-    // Load side, top, and bottom texture
-    let sideTex = loader.load('grass_block_side.png')
-    let topTex = loader.load('grass_block_top_green.png')
-    let botTex = loader.load('dirt.png')
+//     // Load side, top, and bottom texture
+//     let sideTex = loader.load('grass_block_side.png')
+//     let topTex = loader.load('grass_block_top_green.png')
+//     let botTex = loader.load('dirt.png')
 
 
-    for (let z = 0; z < depth; z++) {
-        for (let x = 0; x < width; x++) {
-            let val = Math.round((simplex.noise2D(x * genSize, z * genSize)) * genHeight)
+//     for (let z = 0; z < depth; z++) {
+//         for (let x = 0; x < width; x++) {
+//             let val = Math.round((simplex.noise2D(x * genSize, z * genSize)) * genHeight)
 
-            let block = new Block(x - width/2, val, z - depth/2, 1, [sideTex, topTex, botTex])
+//             let block = new Block(x - width/2, val, z - depth/2, 1, [sideTex, topTex, botTex])
 
-            scene.add(block.generateMesh())
-        }
-    }
-}
+//             scene.add(block.generateMesh())
+//         }
+//     }
+// }
 
-generate()
+// generate()
+
+let chunks = [
+    new Chunk(0, 0, simplex, 10, 0.01),
+    new Chunk(1, 0, simplex, 10, 0.01),
+    new Chunk(1, 1, simplex, 10, 0.01),
+    new Chunk(0, 1, simplex, 10, 0.01)
+]
+
+chunks.forEach(chunk => {
+    let chunkMesh = chunk.generateMesh()
+
+    chunkMesh.forEach(block => {
+        console.log(block)
+        scene.add(block)
+    })
+})
 
 // Start render loop
 render()
