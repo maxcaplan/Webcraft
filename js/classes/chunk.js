@@ -38,20 +38,60 @@ export default class Chunk {
                 for (let y = 0; y < 3; y++) {
                     let Y = height - y
                     if (y == 0) {
-                        this.blocks.push(new Block(X, Y, Z, 1, [sideTex, topTex, botTex]))
+                        this.blocks.push({
+                            block: new Block(X, Y, Z, 2, [sideTex, topTex, botTex]),
+                            x: X,
+                            y: Y,
+                            z: Z
+                        })
                     } else {
-                        this.blocks.push(new Block(X, Y, Z, 1, botTex))
+                        this.blocks.push({
+                            block: new Block(X, Y, Z, 1, botTex),
+                            x: X,
+                            y: Y,
+                            z: Z
+                        })
                     }
                 }
             }
         }
     }
 
+    // Checks wether block has hidden faces
+    checkFaces(x, y, z) {
+        let px = this.blocks.find(data => {
+            return data.x == x + 1 && data.y == y && data.z == z
+        })
+        let nx = this.blocks.find(data => {
+            return data.x == x - 1 && data.y == y && data.z == z
+        })
+
+        let py = this.blocks.find(data => {
+            return data.x == x && data.y == y + 1 && data.z == z
+        })
+        let ny = this.blocks.find(data => {
+            return data.x == x && data.y == y - 1 && data.z == z
+        })
+
+        let pz = this.blocks.find(data => {
+            return data.x == x && data.y == y && data.z == z + 1
+        })
+        let nz = this.blocks.find(data => {
+            return data.x == x && data.y == y && data.z == z - 1
+        })
+
+        let values = [typeof (px) == 'undefined', typeof (nx) == 'undefined', typeof (py) == 'undefined', typeof (ny) == 'undefined', typeof (pz) == 'undefined', typeof (nz) == 'undefined']
+        return values
+    }
+
+    // generates all meshes for chunk
     generateMesh() {
         let meshes = []
 
-        this.blocks.forEach(block => {
-            meshes.push(block.generateMesh())
+        this.blocks.forEach(data => {
+            let sides = this.checkFaces(data.block.x, data.block.y, data.block.z)
+            let mesh = data.block.generateMesh(sides)
+            meshes.push(mesh)
         })
 
         return meshes

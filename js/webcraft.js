@@ -98,7 +98,7 @@ camera.position.z = 10
 camera.rotation.y = 45 * Math.PI / 180
 
 // Add fog to scene
-scene.fog = new THREE.FogExp2( 0x96D1FF, 0.025 );
+scene.fog = new THREE.FogExp2(0x96D1FF, 0.025);
 
 // FPS counter
 var stats = new Stats()
@@ -127,9 +127,9 @@ function render(time) {
 // Test multi chunk gen
 let chunks = [
     new Chunk(0, 0, 24, simplex, 10, 0.01),
-    // new Chunk(1, 0, simplex, 10, 0.01),
-    // new Chunk(1, 1, simplex, 10, 0.01),
-    // new Chunk(0, 1, simplex, 10, 0.01)
+    // new Chunk(1, 0, 24, simplex, 10, 0.01),
+    // new Chunk(1, 1, 24, simplex, 10, 0.01),
+    // new Chunk(0, 1, 24, simplex, 10, 0.01)
 ]
 
 chunks.forEach(chunk => {
@@ -149,7 +149,7 @@ chunks.forEach(chunk => {
 // let botTex = loader.load('dirt.png')
 
 // let testBlock = new Block(0, 0, 0, 1, [sideTex, topTex, botTex])
-// scene.add(testBlock.generateMesh())
+// scene.add(testBlock.generateMesh([true, true, true, true, true, true]))
 
 // Start render loop
 render()

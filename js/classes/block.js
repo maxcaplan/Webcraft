@@ -1,33 +1,64 @@
 import * as THREE from "../packages/three.module.js"
+import {
+    BufferGeometryUtils
+} from "../packages/BufferGeometryUtils.js"
 
 export default class Block {
     constructor(X, Y, Z, type, texture) {
         this.x = X
         this.y = Y
         this.z = Z
-        this.type
+        this.type = type
 
         this.material = this.generateMaterial(texture)
     }
 
-    generateMesh() {
-        // var geometry = new THREE.BufferGeometry();
-        let geometry = new THREE.BoxGeometry()
+    generateMesh(sides) {
+        var matrix = new THREE.Matrix4();
 
-        // var vertices = new Float32Array([
-        //     -1.0, -1.0, 1.0,
-        //     1.0, -1.0, 1.0,
-        //     1.0, 1.0, 1.0,
+        var pxGeometry = new THREE.PlaneGeometry(1, 1);
+        pxGeometry.rotateY(Math.PI / 2);
+        pxGeometry.translate(0.5, 0, 0);
 
-        //     1.0, 1.0, 1.0,
-        //     -1.0, 1.0, 1.0,
-        //     -1.0, -1.0, 1.0
-        // ]);
+        var nxGeometry = new THREE.PlaneGeometry(1, 1);
+        nxGeometry.rotateY(-Math.PI / 2);
+        nxGeometry.translate(-0.5, 0, 0);
 
-        // geometry.addGroup()
-        // var material = new THREE.MeshStandardMaterial( { color: 0xff0000 } );
+        var pyGeometry = new THREE.PlaneGeometry(1, 1);
+        pyGeometry.rotateX(-Math.PI / 2);
+        pyGeometry.translate(0, 0.5, 0);
 
-        let cube = new THREE.Mesh(geometry, this.material)
+        var nyGeometry = new THREE.PlaneGeometry(1, 1);
+        nyGeometry.rotateX(Math.PI / 2);
+        nyGeometry.translate(0, -0.5, 0);
+
+        var pzGeometry = new THREE.PlaneGeometry(1, 1);
+        pzGeometry.translate(0, 0, 0.5);
+
+        var nzGeometry = new THREE.PlaneGeometry(1, 1);
+        nzGeometry.rotateY(Math.PI);
+        nzGeometry.translate(0, 0, -0.5);
+
+        var geometry = new THREE.Geometry();
+
+        if(sides[0]) geometry.merge(pxGeometry, matrix, 0)
+        if(sides[1]) geometry.merge(nxGeometry, matrix, 1)
+
+        if(sides[2]) geometry.merge(pyGeometry, matrix, 2)
+        if(sides[3]) geometry.merge(nyGeometry, matrix, 3)
+
+        if(sides[4]) geometry.merge(pzGeometry, matrix, 4)
+        if(sides[5]) geometry.merge(nzGeometry, matrix, 5)
+
+        geometry = new THREE.BufferGeometry().fromGeometry(geometry);
+
+        let material = new THREE.MeshStandardMaterial({
+            side: THREE.DoubleSide,
+            color: 0xFF0000
+        })
+
+        // var geometry = new THREE.BoxBufferGeometry(1, 1, 1);
+        var cube = new THREE.Mesh(geometry, this.material);
 
         cube.position.x = this.x
         cube.position.y = this.y
@@ -41,7 +72,8 @@ export default class Block {
             // Single Texture
             texture.magFilter = THREE.NearestFilter
             return new THREE.MeshStandardMaterial({
-                map: texture
+                map: texture,
+                side: THREE.DoubleSide
             })
         } else {
             if (texture.length == 3) {
@@ -57,22 +89,28 @@ export default class Block {
 
                 return [
                     new THREE.MeshStandardMaterial({
-                        map: side
+                        map: side,
+                        side: THREE.DoubleSide
                     }),
                     new THREE.MeshStandardMaterial({
-                        map: side
+                        map: side,
+                        side: THREE.DoubleSide
                     }),
                     new THREE.MeshStandardMaterial({
-                        map: top
+                        map: top,
+                        side: THREE.DoubleSide
                     }),
                     new THREE.MeshStandardMaterial({
-                        map: bot
+                        map: bot,
+                        side: THREE.DoubleSide
                     }),
                     new THREE.MeshStandardMaterial({
-                        map: side
+                        map: side,
+                        side: THREE.DoubleSide
                     }),
                     new THREE.MeshStandardMaterial({
-                        map: side
+                        map: side,
+                        side: THREE.DoubleSide
                     }),
                 ]
             } else if (texture.length == 6) {
@@ -82,7 +120,8 @@ export default class Block {
                     texture[i].magFilter = THREE.NearestFilter
                     mats.push(
                         new THREE.MeshStandardMaterial({
-                            map: texture[i]
+                            map: texture[i],
+                            side: THREE.DoubleSide
                         }))
                 }
 
