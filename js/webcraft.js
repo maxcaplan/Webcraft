@@ -55,6 +55,13 @@ controls.enableDamping = true
 controls.dampingFactor = 0.05
 
 controls.screenSpacePanning = false
+controls.enableKeys = true
+controls.keys = {
+    LEFT: 65,
+    UP: 87,
+    RIGHT: 68,
+    BOTTOM: 83
+}
 
 controls.minDistance = 1
 controls.maxDistance = 100
@@ -81,6 +88,7 @@ light.position.set(-10, 10, 4)
 scene.add(light)
 
 camera.position.z = 10
+camera.rotation.y = 45 * Math.PI / 180
 
 // FPS counter
 var stats = new Stats()
@@ -111,6 +119,12 @@ function render(time) {
 
 // Test world gen function
 function generate() {
+    let width = 16  
+    let depth = 16
+
+    let genHeight = 10
+    let genSize = 0.01
+
     // Texture loader
     let loader = new THREE.TextureLoader();
     loader.setPath("../resources/textures/blocks/")
@@ -148,16 +162,17 @@ function generate() {
     ];
 
 
-    for (let z = 0; z < 10; z++) {
-        for (let x = 0; x < 10; x++) {
-            let val = Math.round((simplex.noise2D(x, z) + 1) / 2 * 255)
+    for (let z = 0; z < depth; z++) {
+        for (let x = 0; x < width; x++) {
+            let val = Math.round((simplex.noise2D(x * genSize, z * genSize)) * genHeight)
 
             let geometry = new THREE.BoxGeometry(1, 1, 1)
 
             let cube = new THREE.Mesh(geometry, materials)
 
-            cube.position.x = x - 4.5
-            cube.position.z = z - 4.5
+            cube.position.x = x - width / 2
+            cube.position.z = z - depth / 2
+            cube.position.y = val
 
             scene.add(cube)
         }
