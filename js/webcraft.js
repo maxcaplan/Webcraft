@@ -7,11 +7,11 @@ import {
 } from './packages/OrbitControls.js'
 import "./packages/simplex-noise.js"
 
-
 // Import classes
 import Blocks from "./classes/block.js"
 import Chunk from "./classes/chunk.js"
-import Block from "./classes/block.js"
+
+const WORLD_SIZE = 12
 
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
@@ -44,6 +44,9 @@ height = document.body.clientHeight
 let scene = new THREE.Scene()
 // Three.js camera (FOV, Aspect Ratio, near clipping plain, far clipping plain)
 let camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
+
+camera.position.y = 10
+camera.rotation.y = 45 * Math.PI / 180
 
 // Setup renderer
 let renderer = new THREE.WebGLRenderer()
@@ -94,11 +97,8 @@ scene.add(dirLight)
 var ambLight = new THREE.AmbientLight(0x404040); // soft white light
 scene.add(ambLight);
 
-camera.position.z = 10
-camera.rotation.y = 45 * Math.PI / 180
-
 // Add fog to scene
-scene.fog = new THREE.FogExp2(0x96D1FF, 0.025);
+scene.fog = new THREE.FogExp2(0x96D1FF, 0.0025);
 
 // FPS counter
 var stats = new Stats()
@@ -123,33 +123,19 @@ function render(time) {
     stats.end()
 }
 
+let chunks = []
 
-// Test multi chunk gen
-let chunks = [
-    new Chunk(0, 0, 24, simplex, 10, 0.01),
-    // new Chunk(1, 0, 24, simplex, 10, 0.01),
-    // new Chunk(1, 1, 24, simplex, 10, 0.01),
-    // new Chunk(0, 1, 24, simplex, 10, 0.01)
-]
+for (let x = 0; x < WORLD_SIZE; x++) {
+    for (let y = 0; y < WORLD_SIZE; y++) {
+        chunks.push(new Chunk(x - WORLD_SIZE / 2, y - WORLD_SIZE / 2, 24, simplex, 10, 0.01))
+    }
+}
 
 chunks.forEach(chunk => {
     let chunkMesh = chunk.generateMesh()
 
-    chunkMesh.forEach(block => {
-        scene.add(block)
-    })
+    scene.add(chunkMesh)
 })
-
-// let loader = new THREE.TextureLoader();
-// loader.setPath("../resources/textures/blocks/")
-
-// // Load side, top, and bottom texture
-// let sideTex = loader.load('grass_block_side.png')
-// let topTex = loader.load('grass_block_top_green.png')
-// let botTex = loader.load('dirt.png')
-
-// let testBlock = new Block(0, 0, 0, 1, [sideTex, topTex, botTex])
-// scene.add(testBlock.generateMesh([true, true, true, true, true, true]))
 
 // Start render loop
 render()

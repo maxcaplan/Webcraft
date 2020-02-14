@@ -10,11 +10,15 @@ export default class Block {
         this.z = Z
         this.type = type
 
-        this.material = this.generateMaterial(texture)
+        this.textures = texture
+
+        // this.material = this.generateMaterial(texture)
     }
 
     generateMesh(sides) {
         var matrix = new THREE.Matrix4();
+
+        matrix.setPosition(this.x, this.y, this.z)
 
         var pxGeometry = new THREE.PlaneGeometry(1, 1);
         pxGeometry.rotateY(Math.PI / 2);
@@ -50,21 +54,16 @@ export default class Block {
         if(sides[4]) geometry.merge(pzGeometry, matrix, 4)
         if(sides[5]) geometry.merge(nzGeometry, matrix, 5)
 
-        geometry = new THREE.BufferGeometry().fromGeometry(geometry);
-
-        let material = new THREE.MeshStandardMaterial({
-            side: THREE.DoubleSide,
-            color: 0xFF0000
-        })
+        // geometry = new THREE.BufferGeometry().fromGeometry(geometry);
 
         // var geometry = new THREE.BoxBufferGeometry(1, 1, 1);
-        var cube = new THREE.Mesh(geometry, this.material);
+        // var cube = new THREE.Mesh(geometry, this.material);
 
-        cube.position.x = this.x
-        cube.position.y = this.y
-        cube.position.z = this.z
+        // cube.position.x = this.x
+        // cube.position.y = this.y
+        // cube.position.z = this.z
 
-        return cube
+        return geometry
     }
 
     generateMaterial(texture) {

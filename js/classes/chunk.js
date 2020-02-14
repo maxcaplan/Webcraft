@@ -86,14 +86,28 @@ export default class Chunk {
 
     // generates all meshes for chunk
     generateMesh() {
-        let meshes = []
+        let matrix = new THREE.Matrix4()
+        let geometries = []
 
         this.blocks.forEach(data => {
             let sides = this.checkFaces(data.block.x, data.block.y, data.block.z)
-            let mesh = data.block.generateMesh(sides)
-            meshes.push(mesh)
+            geometries.push(data.block.generateMesh(sides))
         })
 
-        return meshes
+        var geometry = new THREE.Geometry();
+
+        geometries.forEach(data => {
+            geometry.merge(data, matrix, 0)
+        })
+
+        geometry = new THREE.BufferGeometry().fromGeometry(geometry)
+
+        let material = new THREE.MeshPhongMaterial({
+            color: 0x00FF00
+        })
+
+        let mesh = new THREE.Mesh(geometry, material);
+
+        return mesh
     }
 }
