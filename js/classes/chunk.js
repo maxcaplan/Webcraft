@@ -28,7 +28,6 @@ export default class Chunk {
                 let Z = z + (this.globalZ * this.size) - this.size / 2 + 0.5
 
                 let height = Math.round(((this.simplex.noise2D(X * this.genSize, Z * this.genSize) + 2) / 2) * this.genHeight)
-                console.log(height)
                 for (let y = 0; y < this.chunkDepth + height; y++) {
                     let Y = height - y - this.genHeight - this.chunkDepth
                     if (y == 0) {

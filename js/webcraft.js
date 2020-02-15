@@ -88,7 +88,6 @@ const skybox = skyLoader.load([
 ])
 scene.background = skybox
 
-
 // Add lights to scene
 let dirLight = new THREE.DirectionalLight(0xFFFFFF, 1)
 dirLight.position.set(-10, 10, 4)
@@ -104,6 +103,33 @@ scene.fog = new THREE.FogExp2(0x96D1FF, 0.02);
 var stats = new Stats()
 stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom)
+
+let geometry = new THREE.BoxBufferGeometry()
+let material = new THREE.MeshPhongMaterial({
+    color: 0xFFFFFF
+})
+let cube = new THREE.Mesh(geometry, material)
+// cube.position.y = 10
+scene.add(cube)
+
+
+// **************** //
+// World Generation //
+// **************** //
+let chunks = []
+
+// Temporary world gen
+for (let x = 0; x < WORLD_SIZE; x++) {
+    for (let z = 0; z < WORLD_SIZE; z++) {
+        chunks.push(new Chunk(x - WORLD_SIZE / 2 + 0.5, z - WORLD_SIZE / 2 + 0.5, 10, simplex, 10, 0.01))
+    }
+}
+
+chunks.forEach(chunk => {
+    let chunkMesh = chunk.generateMesh()
+
+    scene.add(chunkMesh)
+})
 
 // Render loop
 function render(time) {
@@ -122,29 +148,6 @@ function render(time) {
 
     stats.end()
 }
-
-let chunks = []
-
-// Temporary world gen
-for (let x = 0; x < WORLD_SIZE; x++) {
-    for (let z = 0; z < WORLD_SIZE; z++) {
-        chunks.push(new Chunk(x - WORLD_SIZE / 2 + 0.5, z - WORLD_SIZE / 2 + 0.5, 10, simplex, 10, 0.01))
-    }
-}
-
-chunks.forEach(chunk => {
-    let chunkMesh = chunk.generateMesh()
-
-    scene.add(chunkMesh)
-})
-
-let geometry = new THREE.BoxBufferGeometry()
-let material = new THREE.MeshPhongMaterial({
-    color: 0xFFFFFF
-})
-let cube = new THREE.Mesh(geometry, material)
-// cube.position.y = 10
-scene.add(cube)
 
 // Start render loop
 render()
