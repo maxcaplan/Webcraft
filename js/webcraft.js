@@ -11,7 +11,7 @@ import "./packages/simplex-noise.js"
 import Blocks from "./classes/block.js"
 import Chunk from "./classes/chunk.js"
 
-const WORLD_SIZE = 12
+const WORLD_SIZE = 5
 
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
@@ -98,7 +98,7 @@ var ambLight = new THREE.AmbientLight(0x404040); // soft white light
 scene.add(ambLight);
 
 // Add fog to scene
-scene.fog = new THREE.FogExp2(0x96D1FF, 0.0025);
+scene.fog = new THREE.FogExp2(0x96D1FF, 0.02);
 
 // FPS counter
 var stats = new Stats()
@@ -125,9 +125,10 @@ function render(time) {
 
 let chunks = []
 
+// Temporary world gen
 for (let x = 0; x < WORLD_SIZE; x++) {
-    for (let y = 0; y < WORLD_SIZE; y++) {
-        chunks.push(new Chunk(x - WORLD_SIZE / 2, y - WORLD_SIZE / 2, 24, simplex, 10, 0.01))
+    for (let z = 0; z < WORLD_SIZE; z++) {
+        chunks.push(new Chunk(x - WORLD_SIZE / 2 + 0.5, z - WORLD_SIZE / 2 + 0.5, 10, simplex, 10, 0.01))
     }
 }
 
@@ -136,6 +137,14 @@ chunks.forEach(chunk => {
 
     scene.add(chunkMesh)
 })
+
+let geometry = new THREE.BoxBufferGeometry()
+let material = new THREE.MeshPhongMaterial({
+    color: 0xFFFFFF
+})
+let cube = new THREE.Mesh(geometry, material)
+// cube.position.y = 10
+scene.add(cube)
 
 // Start render loop
 render()
