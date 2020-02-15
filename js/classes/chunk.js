@@ -24,7 +24,7 @@ export default class Chunk {
     generateBlocks() {
         for (let z = 0; z < this.size; z++) {
             for (let x = 0; x < this.size; x++) {
-                let X = x + (this.globalX * this.size) - this.size / 2 + 0.5 
+                let X = x + (this.globalX * this.size) - this.size / 2 + 0.5
                 let Z = z + (this.globalZ * this.size) - this.size / 2 + 0.5
 
                 let height = Math.round(((this.simplex.noise2D(X * this.genSize, Z * this.genSize) + 2) / 2) * this.genHeight)
@@ -137,10 +137,6 @@ export default class Chunk {
         })
 
         geometry = new THREE.BufferGeometry().fromGeometry(geometry)
-
-        let material = new THREE.MeshPhongMaterial({
-            color: 0x00aa00
-        })
 
         let mesh = new THREE.Mesh(geometry, this.materials);
 
