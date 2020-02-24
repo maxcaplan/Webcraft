@@ -11,7 +11,26 @@ import "./packages/simplex-noise.js"
 import Blocks from "./classes/block.js"
 import Chunk from "./classes/chunk.js"
 
-const WORLD_SIZE = 5
+var xhr = new XMLHttpRequest();
+var data = {
+    "name": "Max",
+    "int": 10
+}
+
+xhr.open("POST", '/api/test', true);
+xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
+
+xhr.send(JSON.stringify(data))
+
+xhr.onreadystatechange = () => {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+        if(xhr.status == 200) {
+            console.log(xhr.responseText)
+        }
+    }
+}
+
+const WORLD_SIZE = 1
 
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
