@@ -1,0 +1,33 @@
+{
+  "name": "webcraft",
+  "version": "0.5.0",
+  "description": "A minecraft clone built with Three.js",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jellycream/Webcraft.git"
+  },
+  "keywords": [
+    "Minecraft",
+    "Webcraft",
+    "Voxel",
+    "Node"
+  ],
+  "author": "Max Caplan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Jellycream/Webcraft/issues"
+  },
+  "homepage": "https://github.com/Jellycream/Webcraft#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
