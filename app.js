@@ -4,6 +4,8 @@ const app = express()
 const hostname = '127.0.0.1';
 const port = 3000;
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.use(express.static('public'))
+
+// app.get('/', (req, res) => res.send('Hello World!'))
 
 app.listen(port, hostname, () => console.log(`Example app listening on port ${port}`))
