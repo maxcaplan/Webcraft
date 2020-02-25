@@ -2,7 +2,7 @@ import * as THREE from "../packages/three.module.js"
 import Block from "./block.js"
 
 export default class Chunk {
-    constructor(X, Z, chunkDepth, simplex, genHeight, genSize) {
+    constructor(X, Z, chunkDepth, simplex, genHeight, genSize, generate = true) {
         // Instantiation Values
         this.globalX = X
         this.globalZ = Z
@@ -17,7 +17,10 @@ export default class Chunk {
         this.materialsOrder = []
 
         this.blocks = []
-        this.generateBlocks()
+
+        if (generate) {
+            this.generateBlocks()
+        }
     }
 
     // Generates array of block objects
@@ -114,32 +117,32 @@ export default class Chunk {
 
     // Generates chunks mesh based on blocks
     generateMesh() {
-        let matrix = new THREE.Matrix4()
-        let geometries = []
+        // let matrix = new THREE.Matrix4()
+        // let geometries = []
 
-        this.generateMaterial()
+        // this.generateMaterial()
 
-        this.blocks.forEach(data => {
-            let sides = this.checkFaces(data.block.x, data.block.y, data.block.z)
+        // this.blocks.forEach(data => {
+        //     let sides = this.checkFaces(data.block.x, data.block.y, data.block.z)
 
-            geometries.push(data.block.generateMesh(sides))
-        })
+        //     geometries.push(data.block.generateMesh(sides))
+        // })
 
-        let geometry = new THREE.Geometry()
+        // let geometry = new THREE.Geometry()
 
-        geometries.forEach(data => {
-            let matOffset = this.materialsOrder.find(k => k.type == data.type).start
+        // geometries.forEach(data => {
+        //     let matOffset = this.materialsOrder.find(k => k.type == data.type).start
 
-            data.geometry.forEach(face => {
-                geometry.merge(face.plane, matrix, matOffset + (face.side - 1))
-            })
-        })
+        //     data.geometry.forEach(face => {
+        //         geometry.merge(face.plane, matrix, matOffset + (face.side - 1))
+        //     })
+        // })
 
-        geometry = new THREE.BufferGeometry().fromGeometry(geometry)
+        // geometry = new THREE.BufferGeometry().fromGeometry(geometry)
 
-        let mesh = new THREE.Mesh(geometry, this.materials);
+        // let mesh = new THREE.Mesh(geometry, this.materials);
 
-        return mesh
+        // return mesh
     }
 
     // Checks wether block has hidden faces
