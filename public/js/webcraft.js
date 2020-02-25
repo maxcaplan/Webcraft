@@ -11,25 +11,6 @@ import "./packages/simplex-noise.js"
 import Blocks from "./classes/block.js"
 import Chunk from "./classes/chunk.js"
 
-var xhr = new XMLHttpRequest();
-var data = {
-    "name": "Max",
-    "int": 10
-}
-
-xhr.open("POST", '/api/test', true);
-xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
-
-xhr.send(JSON.stringify(data))
-
-xhr.onreadystatechange = () => {
-    if (xhr.readyState == XMLHttpRequest.DONE) {
-        if(xhr.status == 200) {
-            console.log(xhr.responseText)
-        }
-    }
-}
-
 const WORLD_SIZE = 1
 
 // Generate alphanumeric world seed
@@ -147,8 +128,32 @@ for (let x = 0; x < WORLD_SIZE; x++) {
 chunks.forEach(chunk => {
     let chunkMesh = chunk.generateMesh()
 
-    scene.add(chunkMesh)
+    // scene.add(chunkMesh)
 })
+
+var xhr = new XMLHttpRequest();
+var data = {
+    x: 0,
+    y: 0,
+    chunkDepth: 10,
+    chunkHeight: 10,
+    chunkSize: 0.01,
+    seed: seed
+}
+
+console.log("sending chunk request")
+xhr.open("POST", '/world/chunkGen', true);
+xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
+
+xhr.send(JSON.stringify(data))
+
+xhr.onreadystatechange = () => {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+        if (xhr.status == 200) {
+            console.log(JSON.parse(xhr.responseText))
+        }
+    }
+}
 
 // Render loop
 function render(time) {
