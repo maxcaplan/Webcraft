@@ -66,16 +66,17 @@ export default class Chunk {
                     let dirt = loader.load('dirt.png')
                     dirt.magFilter = THREE.NearestFilter
 
-                    let mat = new THREE.MeshBasicMaterial({
+                    let mat = new THREE.MeshPhongMaterial({
                         map: dirt,
                         side: THREE.DoubleSide
                     })
 
                     order.push({
                         type: data.block.type,
-                        start: mats.length
+                        start: mats.length,
+                        length: 1
                     })
-                    mats.push(mat, mat, mat, mat, mat, mat)
+                    mats.push(mat)
 
                 }
                 if (data.block.type == 2) {
@@ -86,24 +87,25 @@ export default class Chunk {
                     top.magFilter = THREE.NearestFilter
                     bot.magFilter = THREE.NearestFilter
 
-                    let xz = new THREE.MeshBasicMaterial({
+                    let sideMat = new THREE.MeshPhongMaterial({
                         map: side,
                         side: THREE.DoubleSide
                     })
-                    let py = new THREE.MeshBasicMaterial({
+                    let topMat = new THREE.MeshPhongMaterial({
                         map: top,
                         side: THREE.DoubleSide
                     })
-                    let ny = new THREE.MeshBasicMaterial({
+                    let botMat = new THREE.MeshPhongMaterial({
                         map: bot,
                         side: THREE.DoubleSide
                     })
 
                     order.push({
                         type: data.block.type,
-                        start: mats.length
+                        start: mats.length,
+                        length: 3
                     })
-                    mats.push(xz, xz, py, ny, xz, xz)
+                    mats.push(sideMat, topMat, botMat)
                 }
             }
         })
@@ -127,12 +129,32 @@ export default class Chunk {
 
         let geometry = new THREE.Geometry()
 
+        // Merge geometries
         geometries.forEach(data => {
-            let matOffset = this.materialsOrder.find(k => k.type == data.type).start
+            // Calculate material index for face
+            let matMeta = this.materialsOrder.find(k => k.type == data.type)
+            let start = matMeta.start
+            let len = matMeta.length
 
-            data.geometry.forEach(face => {
-                geometry.merge(face.plane, matrix, matOffset + (face.side - 1))
-            })
+            if (len == 1) {
+                data.geometry.forEach(face => {
+                    geometry.merge(face.plane, matrix, start)
+                })
+            } else if (len == 3) {
+                data.geometry.forEach(face => {
+                    if (face.side == 'py') {
+                        geometry.merge(face.plane, matrix, start + 1)
+                    } else if (face.side == 'ny') {
+                        geometry.merge(face.plane, matrix, start + 2)
+                    } else {
+                        geometry.merge(face.plane, matrix, start)
+                    }
+                })
+            } else {
+                data.geometry.forEach(face => {
+                    geometry.merge(face.plane, matrix, start + (face.index - 1))
+                })
+            }
         })
 
         geometry = new THREE.BufferGeometry().fromGeometry(geometry)

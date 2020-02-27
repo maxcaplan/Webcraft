@@ -11,7 +11,7 @@ import "./packages/simplex-noise.js"
 import Blocks from "./classes/block.js"
 import Chunk from "./classes/chunk.js"
 
-const WORLD_SIZE = 1
+const WORLD_SIZE = 6
 
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
@@ -89,11 +89,11 @@ const skybox = skyLoader.load([
 scene.background = skybox
 
 // Add lights to scene
-let dirLight = new THREE.DirectionalLight(0xFFFFFF, 1)
-dirLight.position.set(-10, 10, 4)
-scene.add(dirLight)
+// let dirLight = new THREE.DirectionalLight(0xFFFFFF, 1)
+// dirLight.position.set(-10, 10, 4)
+// scene.add(dirLight)
 
-var ambLight = new THREE.AmbientLight(0x404040); // soft white light
+var ambLight = new THREE.AmbientLight(0xFFFFFF); // soft white light
 scene.add(ambLight);
 
 // Add fog to scene

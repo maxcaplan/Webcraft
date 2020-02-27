@@ -47,29 +47,35 @@ export default class Block {
 
         if (sides[0]) geometries.push({
             plane: pxGeometry,
-            side: 1
+            side: 'px',
+            index: 1
         })
         if (sides[1]) geometries.push({
             plane: nxGeometry,
-            side: 2
+            side: 'nx',
+            index: 2
         })
 
         if (sides[2]) geometries.push({
             plane: pyGeometry,
-            side: 3
+            side: 'py',
+            index: 3
         })
         if (sides[3]) geometries.push({
             plane: nyGeometry,
-            side: 4
+            side: 'ny',
+            index: 4
         })
 
         if (sides[4]) geometries.push({
             plane: pzGeometry,
-            side: 5
+            side: 'pz',
+            index: 5
         })
         if (sides[5]) geometries.push({
             plane: nzGeometry,
-            side: 6
+            side: 'nz',
+            index: 6
         })
 
         // geometry = new THREE.BufferGeometry().fromGeometry(geometry);
