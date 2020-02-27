@@ -11,7 +11,7 @@ import "./packages/simplex-noise.js"
 import Blocks from "./classes/block.js"
 import Chunk from "./classes/chunk.js"
 
-const WORLD_SIZE = 5
+const WORLD_SIZE = 1
 
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
