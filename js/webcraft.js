@@ -20,8 +20,9 @@ let renderDistance = 2
 
 let pause = false
 
+let chunkId = 0
 let chunks = []
-let chunkQueue = []
+let chunkMeshs = []
 
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
@@ -135,6 +136,8 @@ let cube = new THREE.Mesh(geometry, material)
 // cube.position.y = 10
 scene.add(cube)
 
+let direction = true
+
 // Render loop
 function render(time) {
     if (!pause) {
@@ -146,9 +149,15 @@ function render(time) {
         controls.update()
         renderer.render(scene, camera)
 
-        cube.position.x += 0.05
+        if(direction) {
+            if(cube.position.x < 50) cube.position.x += 0.1
+            else direction = false
+        } else {
+            if(cube.position.x > -50) cube.position.x -= 0.1
+            else direction = true
+        }
 
-        generateChunks(cube.position.x, cube.position.z)
+        loadChunks(cube.position.x, cube.position.z)
 
         stats.end()
     }
@@ -200,7 +209,7 @@ unpauseBtn.onclick = e => {
 // World Generation //
 // **************** //
 
-function generateChunks(posX, posZ) {
+function loadChunks(posX, posZ) {
     // Calculate position of cube relative to chunks
     let centerX = Math.round(posX / 16)
     let centerZ = Math.round(posZ / 16)
@@ -214,12 +223,37 @@ function generateChunks(posX, posZ) {
                 return chunk.globalX == searchX && chunk.globalZ == searchZ
             })
 
+
             if (search == undefined) {
-                chunks.push(new Chunk(searchX, searchZ, 10, simplex, 10, 0.01))
-                scene.add(chunks[chunks.length - 1].generateMesh())
+                let chunk = new Chunk(searchX, searchZ, 10, simplex, 10, 0.01, chunkId)
+                chunks.push(chunk)
+                chunkId++
+
+                let mesh = chunk.generateMesh()
+                mesh.name = chunk.id
+                scene.add(mesh)
+            } else if (!search.visible && search.hasMesh) {
+                let chunkMesh = scene.getObjectByName(search.id)
+                chunkMesh.visible = true
+                search.visible = true
             }
         }
     }
+
+    // Check if any chunks are out of render distance
+    let distant = chunks.filter(chunk => {
+        let distance = Math.sqrt(Math.pow((centerX - chunk.globalX), 2) + Math.pow((centerZ - chunk.globalZ), 2))
+        return distance > renderDistance + 1
+    })
+
+    // Hide chunks that are out of render distance
+    distant.forEach(chunk => {
+        if (chunk.visible && chunk.hasMesh) {
+            let chunkMesh = scene.getObjectByName(chunk.id)
+            chunkMesh.visible = false
+            chunk.visible = false
+        }
+    })
 }
 
 // Temporary world gen

@@ -2,7 +2,7 @@ import * as THREE from "../packages/three.module.js"
 import Block from "./block.js"
 
 export default class Chunk {
-    constructor(X, Z, chunkDepth, simplex, genHeight, genSize) {
+    constructor(X, Z, chunkDepth, simplex, genHeight, genSize, id) {
         // Instantiation Values
         this.globalX = X
         this.globalZ = Z
@@ -19,7 +19,9 @@ export default class Chunk {
         this.blocks = []
         this.generateBlocks()
 
+        this.id = id
         this.hasMesh = false
+        this.visible = false
     }
 
     // Generates array of block objects
@@ -168,6 +170,7 @@ export default class Chunk {
 
         let mesh = new THREE.Mesh(geometry, this.materials);
         this.hasMesh = true
+        this.visible = true
         geometry.dispose()
 
         return mesh
