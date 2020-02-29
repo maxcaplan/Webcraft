@@ -18,6 +18,8 @@ export default class Chunk {
 
         this.blocks = []
         this.generateBlocks()
+
+        this.hasMesh = false
     }
 
     // Generates array of block objects
@@ -139,20 +141,25 @@ export default class Chunk {
             if (len == 1) {
                 data.geometry.forEach(face => {
                     geometry.merge(face.plane, matrix, start)
+                    face.plane.dispose()
                 })
             } else if (len == 3) {
                 data.geometry.forEach(face => {
                     if (face.side == 'py') {
                         geometry.merge(face.plane, matrix, start + 1)
+                        face.plane.dispose()
                     } else if (face.side == 'ny') {
                         geometry.merge(face.plane, matrix, start + 2)
+                        face.plane.dispose()
                     } else {
                         geometry.merge(face.plane, matrix, start)
+                        face.plane.dispose()
                     }
                 })
             } else {
                 data.geometry.forEach(face => {
                     geometry.merge(face.plane, matrix, start + (face.index - 1))
+                    face.plane.dispose()
                 })
             }
         })
@@ -160,6 +167,8 @@ export default class Chunk {
         geometry = new THREE.BufferGeometry().fromGeometry(geometry)
 
         let mesh = new THREE.Mesh(geometry, this.materials);
+        this.hasMesh = true
+        geometry.dispose()
 
         return mesh
     }
