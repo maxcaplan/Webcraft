@@ -11,7 +11,16 @@ import "./packages/simplex-noise.js"
 import Blocks from "./classes/block.js"
 import Chunk from "./classes/chunk.js"
 
-const WORLD_SIZE = 6
+let pauseMenu = document.querySelector(".pause")
+let closeBtn = document.querySelector(".close-btn")
+
+const WORLD_SIZE = 5
+let renderDistance = 2
+
+let pause = false
+
+let chunks = []
+let chunkQueue = []
 
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
@@ -39,6 +48,21 @@ height = document.body.clientHeight
 // ************** //
 // Three js setup //
 // ************** //
+
+// Handel window resize
+window.addEventListener('resize', onWindowResize, false);
+
+function onWindowResize() {
+
+    width = document.body.clientWidth
+    height = document.body.clientHeight
+
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(width, height);
+
+}
 
 // Three.js scene
 let scene = new THREE.Scene()
@@ -88,12 +112,8 @@ const skybox = skyLoader.load([
 ])
 scene.background = skybox
 
-// Add lights to scene
-// let dirLight = new THREE.DirectionalLight(0xFFFFFF, 1)
-// dirLight.position.set(-10, 10, 4)
-// scene.add(dirLight)
-
-var ambLight = new THREE.AmbientLight(0xFFFFFF); // soft white light
+// Basic lighting
+var ambLight = new THREE.AmbientLight(0xFFFFFF);
 scene.add(ambLight);
 
 // Add fog to scene
@@ -112,42 +132,101 @@ let cube = new THREE.Mesh(geometry, material)
 // cube.position.y = 10
 scene.add(cube)
 
-
-// **************** //
-// World Generation //
-// **************** //
-let chunks = []
-
-// Temporary world gen
-for (let x = 0; x < WORLD_SIZE; x++) {
-    for (let z = 0; z < WORLD_SIZE; z++) {
-        chunks.push(new Chunk(x - WORLD_SIZE / 2 + 0.5, z - WORLD_SIZE / 2 + 0.5, 10, simplex, 10, 0.01))
-    }
-}
-
-chunks.forEach(chunk => {
-    let chunkMesh = chunk.generateMesh()
-
-    scene.add(chunkMesh)
-})
-
 // Render loop
 function render(time) {
-    time *= 0.001 // convert time to seconds
+    if (!pause) {
+        time *= 0.001 // convert time to seconds
 
-    stats.begin()
+        stats.begin()
 
-    // Window resize
-    let canvas = renderer.domElement
-    camera.aspect = canvas.clientWidth / canvas.clientHeight
-    camera.updateProjectionMatrix()
+        requestAnimationFrame(render)
+        controls.update()
+        renderer.render(scene, camera)
 
-    requestAnimationFrame(render)
-    controls.update()
-    renderer.render(scene, camera)
+        cube.position.x += 0.05
 
-    stats.end()
+        generateChunks(cube.position.x, cube.position.z)
+
+        stats.end()
+    }
 }
 
 // Start render loop
 render()
+
+// Pause handling
+var down = false
+window.onkeydown = e => {
+    if (down) return
+
+    if (e.keyCode == 27) {
+        pause = !pause
+        render()
+    }
+
+    if (pause) pauseMenu.style.display = "block"
+    if (!pause) pauseMenu.style.display = "none"
+
+    down = true
+}
+
+window.onkeyup = e => {
+    if (e.keyCode == 27) {
+        down = false
+    }
+}
+
+
+// **************** //
+// World Generation //
+// **************** //
+
+function generateChunks(posX, posZ) {
+    // Calculate position of cube relative to chunks
+    let centerX = Math.round(posX / 16)
+    let centerZ = Math.round(posZ / 16)
+
+    for (let x = -renderDistance; x <= renderDistance; x++) {
+        for (let z = -renderDistance; z <= renderDistance; z++) {
+            let searchX = centerX + x
+            let searchZ = centerZ + z
+
+            let search = chunks.find(chunk => {
+                return chunk.globalX == searchX && chunk.globalZ == searchZ
+            })
+
+            if (search == undefined) {
+                chunks.push(new Chunk(searchX, searchZ, 10, simplex, 10, 0.01))
+                scene.add(chunks[chunks.length - 1].generateMesh())
+            }
+        }
+    }
+}
+
+// Temporary world gen
+// chunks.push(new Chunk(0, 0, 10, simplex, 10, 0.01))
+// scene.add(chunks[0].generateMesh())
+// for (let x = 0; x < WORLD_SIZE; x++) {
+//     for (let z = 0; z < WORLD_SIZE; z++) {
+//         chunks.push(new Chunk(x - WORLD_SIZE / 2 + 0.5, z - WORLD_SIZE / 2 + 0.5, 10, simplex, 10, 0.01))
+//     }
+// }
+
+// chunkQueue = chunks.map(chunk => {
+//     return new Promise(resolve => resolve(chunk.generateMesh()))
+// })
+
+// Promise.all(chunkQueue).then(results => {
+//     results.forEach(mesh => {
+//         scene.add(mesh)
+//     })
+// })
+
+// console.log(chunks)
+
+// console.log(promises)
+
+// chunks.forEach(chunk => {
+//     let chunkMesh = chunk.generateMesh()
+//     scene.add(chunkMesh)
+// })
