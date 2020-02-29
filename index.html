@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="./resources/icons/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="./resources/icons/favicon.ico" type="image/x-icon">
     <title>Webcraft</title>
 
     <style>
@@ -19,12 +22,84 @@
             width: 100%;
             height: 100%;
         }
+
+        .center {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .pause {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .pause-menu {
+            position: relative;
+            padding: 20px;
+            margin: auto;
+            width: 75%;
+            -webkit-animation-name: fadeIn;
+            -webkit-animation-duration: 0.4s;
+            animation-name: fadeIn;
+            animation-duration: 0.4s
+        }
+
+        .close-btn {
+            float: right;
+            color: lightgray;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            color: darkgray;
+        }
+
+        @-webkit-keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
     </style>
 
     <script src="./js/packages/stats.min.js"></script>
 </head>
 
 <body>
+    <div class="pause">
+        <div class="center">
+            <div class="pause-menu">
+                <h1 style="text-align: center; color: #fff;">
+                    Paused
+                </h1>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="./js/webcraft.js"></script>
 </body>
 
