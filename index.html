@@ -4,30 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebCraft</title>
 
-    <link rel="shortcut icon" href="./resources/icons/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="./resources/icons/favicon.ico" type="image/x-icon">
-    <title>Webcraft</title>
-
-    <link rel="stylesheet" href="./css/style.css">
-    <script src="./js/packages/stats.min.js"></script>
+    <link rel="stylesheet" href="./css/index.css">
 </head>
 
 <body>
-    <div class="pause">
+    <div class="background">
         <div class="center">
-            <div class="pause-menu">
-                <h1 class="header">
-                    Game Menu
-                </h1>
-                <button class="btn btn-block" id="unpause">Back to Game</button>
+            <div class="menu">
+                <h1 id="title">WebCraft</h1>
+                <button onclick="window.location.href = '/client.html';" class="btn btn-block">Main Menu</button>
             </div>
         </div>
     </div>
 
-    <canvas id="viewport"></canvas>
-
-    <script type="module" src="./js/webcraft.js"></script>
+    <!-- <script src="./js/menu.js"></script> -->
 </body>
 
 </html>
