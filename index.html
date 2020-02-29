@@ -9,83 +9,7 @@
     <link rel="icon" href="./resources/icons/favicon.ico" type="image/x-icon">
     <title>Webcraft</title>
 
-    <style>
-        html,
-        body {
-            margin: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        .center {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-        }
-
-        .pause {
-            display: none;
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .pause-menu {
-            position: relative;
-            padding: 20px;
-            margin: auto;
-            width: 75%;
-            -webkit-animation-name: fadeIn;
-            -webkit-animation-duration: 0.4s;
-            animation-name: fadeIn;
-            animation-duration: 0.4s
-        }
-
-        .close-btn {
-            float: right;
-            color: lightgray;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .close-btn:hover {
-            color: darkgray;
-        }
-
-        @-webkit-keyframes fadeIn {
-            from {
-                opacity: 0
-            }
-
-            to {
-                opacity: 1
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0
-            }
-
-            to {
-                opacity: 1
-            }
-        }
-    </style>
-
+    <link rel="stylesheet" href="./css/style.css">
     <script src="./js/packages/stats.min.js"></script>
 </head>
 
@@ -93,12 +17,15 @@
     <div class="pause">
         <div class="center">
             <div class="pause-menu">
-                <h1 style="text-align: center; color: #fff;">
-                    Paused
+                <h1 class="header">
+                    Game Menu
                 </h1>
+                <button class="btn btn-block" id="unpause">Back to Game</button>
             </div>
         </div>
     </div>
+
+    <canvas id="viewport"></canvas>
 
     <script type="module" src="./js/webcraft.js"></script>
 </body>

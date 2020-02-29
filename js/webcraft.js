@@ -11,8 +11,9 @@ import "./packages/simplex-noise.js"
 import Blocks from "./classes/block.js"
 import Chunk from "./classes/chunk.js"
 
+let viewport = document.querySelector("#viewport")
 let pauseMenu = document.querySelector(".pause")
-let closeBtn = document.querySelector(".close-btn")
+let unpauseBtn = document.querySelector("#unpause")
 
 const WORLD_SIZE = 5
 let renderDistance = 2
@@ -73,7 +74,9 @@ camera.position.y = 10
 camera.rotation.y = 45 * Math.PI / 180
 
 // Setup renderer
-let renderer = new THREE.WebGLRenderer()
+let renderer = new THREE.WebGLRenderer({
+    canvas: viewport
+})
 renderer.setSize(width, height)
 
 // Append renderer to body
@@ -164,8 +167,15 @@ window.onkeydown = e => {
         render()
     }
 
-    if (pause) pauseMenu.style.display = "block"
-    if (!pause) pauseMenu.style.display = "none"
+    if (pause) {
+        pauseMenu.style.display = "block"
+        viewport.style.webkitFilter = "blur(8px)";
+        viewport.style.filter - "blur(8px)"
+    } else {
+        pauseMenu.style.display = "none"
+        viewport.style.webkitFilter = "blur(0px)";
+        viewport.style.filter - "blur(0px)"
+    }
 
     down = true
 }
@@ -176,6 +186,15 @@ window.onkeyup = e => {
     }
 }
 
+unpauseBtn.onclick = e => {
+    pause = false
+
+    pauseMenu.style.display = "none"
+    viewport.style.webkitFilter = "blur(0px)";
+    viewport.style.filter - "blur(0px)"
+
+    render()
+}
 
 // **************** //
 // World Generation //
