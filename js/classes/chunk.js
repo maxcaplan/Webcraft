@@ -70,7 +70,7 @@ export default class Chunk {
                     let dirt = loader.load('dirt.png')
                     dirt.magFilter = THREE.NearestFilter
 
-                    let mat = new THREE.MeshPhongMaterial({
+                    let mat = new THREE.MeshLambertMaterial({
                         map: dirt,
                         side: THREE.DoubleSide
                     })
@@ -91,15 +91,15 @@ export default class Chunk {
                     top.magFilter = THREE.NearestFilter
                     bot.magFilter = THREE.NearestFilter
 
-                    let sideMat = new THREE.MeshPhongMaterial({
+                    let sideMat = new THREE.MeshLambertMaterial({
                         map: side,
                         side: THREE.DoubleSide
                     })
-                    let topMat = new THREE.MeshPhongMaterial({
+                    let topMat = new THREE.MeshLambertMaterial({
                         map: top,
                         side: THREE.DoubleSide
                     })
-                    let botMat = new THREE.MeshPhongMaterial({
+                    let botMat = new THREE.MeshLambertMaterial({
                         map: bot,
                         side: THREE.DoubleSide
                     })

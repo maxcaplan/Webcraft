@@ -8,12 +8,16 @@ import {
 import "./packages/simplex-noise.js"
 
 // Import classes
+import Player from "./classes/player.js"
 import Blocks from "./classes/block.js"
 import Chunk from "./classes/chunk.js"
 
 let viewport = document.querySelector("#viewport")
 let pauseMenu = document.querySelector(".pause")
 let unpauseBtn = document.querySelector("#unpause")
+
+let worldTime = 0
+let timeState = "day"
 
 const WORLD_SIZE = 5
 let renderDistance = 2
@@ -22,7 +26,8 @@ let pause = false
 
 let chunkId = 0
 let chunks = []
-let chunkMeshs = []
+
+const degToRad = Math.PI/180
 
 // Generate alphanumeric world seed
 const MAX_SEED_LENGTH = 19
@@ -114,50 +119,56 @@ const skybox = skyLoader.load([
     'pz.png',
     'nz.png',
 ])
-scene.background = skybox
+
+let dayCol = new THREE.Color(0x8ae5ff)
+let duskCol = new THREE.Color(0x2855b5)
+let nightCol = new THREE.Color(0x34435E)
+
+scene.background = dayCol.clone()
 
 // Basic lighting
-var ambLight = new THREE.AmbientLight(0xFFFFFF);
+let lightCol = new THREE.Color(1, 1, 1)
+let ambLight = new THREE.AmbientLight(lightCol.getHex());
 scene.add(ambLight);
 
 // Add fog to scene
-scene.fog = new THREE.FogExp2(0x96D1FF, 0.02);
+scene.fog = new THREE.FogExp2(0x96D1FF, 0.008);
 
 // FPS counter
-var stats = new Stats()
+let stats = new Stats()
 stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom)
 
-let geometry = new THREE.BoxBufferGeometry()
-let material = new THREE.MeshPhongMaterial({
-    color: 0xFFFFFF
-})
-let cube = new THREE.Mesh(geometry, material)
-// cube.position.y = 10
-scene.add(cube)
+// Create basic player
+let player = new Player(0, 0, 0)
+scene.add(player.object)
 
 let direction = true
 
 // Render loop
 function render(time) {
     if (!pause) {
-        time *= 0.001 // convert time to seconds
+        worldTime += 1
 
         stats.begin()
+        doDayNight(worldTime)
 
         requestAnimationFrame(render)
         controls.update()
         renderer.render(scene, camera)
 
-        if(direction) {
-            if(cube.position.x < 50) cube.position.x += 0.1
-            else direction = false
-        } else {
-            if(cube.position.x > -50) cube.position.x -= 0.1
-            else direction = true
-        }
+        // // Move player left and right
+        // if(direction) {
+        //     if(player.position.x < 50) player.position.x += 0.1
+        //     else direction = false
+        // } else {
+        //     if(player.position.x > -50) player.position.x -= 0.1
+        //     else direction = true
+        // }
 
-        loadChunks(cube.position.x, cube.position.z)
+        loadChunks(player.object.position.x, player.object.position.z)
+
+        player.update(camera)
 
         stats.end()
     }
@@ -167,7 +178,7 @@ function render(time) {
 render()
 
 // Pause handling
-var down = false
+let down = false
 window.onkeydown = e => {
     if (down) return
 
@@ -205,12 +216,12 @@ unpauseBtn.onclick = e => {
     render()
 }
 
-// **************** //
-// World Generation //
-// **************** //
+// *************** //
+// World Functions //
+// *************** //
 
 function loadChunks(posX, posZ) {
-    // Calculate position of cube relative to chunks
+    // Calculate position of player relative to chunks
     let centerX = Math.round(posX / 16)
     let centerZ = Math.round(posZ / 16)
 
@@ -256,7 +267,31 @@ function loadChunks(posX, posZ) {
     })
 }
 
-// Temporary world gen
+// Calculates sky and light based on world time (speed = days per 360 frames)
+function doDayNight(time, speed = 0.01) {
+    // Map world time to scale of -1 to 1 for night to day 
+    let dayNight = Math.cos(degToRad * (time * speed))
+
+    // Adjust ambient light for day and night
+    ambLight.intensity = (dayNight + 1.1) / 2
+
+    // Calculate sky color for day and night
+    let lerpCol = duskCol.clone()
+    if (dayNight > 0) {
+        lerpCol.lerp(dayCol, dayNight)
+        timeState = "night"
+    } else {
+        lerpCol.lerp(nightCol, -dayNight)
+        timeState = "day"
+    }
+    scene.background = lerpCol
+
+    // Set sun and moon rotation for day and night
+    player.sunMoon.rotation.x = degToRad * (time * speed + 90)
+
+}
+
+// Legacy world gen
 // chunks.push(new Chunk(0, 0, 10, simplex, 10, 0.01))
 // scene.add(chunks[0].generateMesh())
 // for (let x = 0; x < WORLD_SIZE; x++) {
@@ -264,20 +299,6 @@ function loadChunks(posX, posZ) {
 //         chunks.push(new Chunk(x - WORLD_SIZE / 2 + 0.5, z - WORLD_SIZE / 2 + 0.5, 10, simplex, 10, 0.01))
 //     }
 // }
-
-// chunkQueue = chunks.map(chunk => {
-//     return new Promise(resolve => resolve(chunk.generateMesh()))
-// })
-
-// Promise.all(chunkQueue).then(results => {
-//     results.forEach(mesh => {
-//         scene.add(mesh)
-//     })
-// })
-
-// console.log(chunks)
-
-// console.log(promises)
 
 // chunks.forEach(chunk => {
 //     let chunkMesh = chunk.generateMesh()
