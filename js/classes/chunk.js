@@ -1,205 +1,209 @@
 import * as THREE from "../packages/three.module.js"
+import {
+    blockTypes,
+    materialMeta
+} from "../config.js"
 import Block from "./block.js"
 
 export default class Chunk {
-    constructor(X, Z, chunkDepth, simplex, genHeight, genSize, id) {
-        // Instantiation Values
-        this.globalX = X
-        this.globalZ = Z
-        this.chunkDepth = chunkDepth
-        this.simplex = simplex
-        this.genHeight = genHeight
-        this.genSize = genSize
+    constructor(X, Z, noise, noiseScale, noiseAmplitude) {
+        this.chunkX = X
+        this.chunkZ = Z
+
+        this.noise = noise
+        this.scale = noiseScale
+        this.noiseAmplitude = noiseAmplitude
 
         this.size = 16
+        this.height = 256
+        this.groundLevel = 62
 
-        this.materials = []
-        this.materialsOrder = []
+        // blocks are stored in the order [y][x][z]
+        this.blocks = this.generateBlocks()
 
-        this.blocks = []
-        this.generateBlocks()
-
-        this.id = id
-        this.hasMesh = false
-        this.visible = false
+        this.worker
     }
 
-    // Generates array of block objects
+    // Creates 3D array of blocks
     generateBlocks() {
-        for (let z = 0; z < this.size; z++) {
-            for (let x = 0; x < this.size; x++) {
-                let X = x + (this.globalX * this.size) - this.size / 2 + 0.5
-                let Z = z + (this.globalZ * this.size) - this.size / 2 + 0.5
+        let blocks = []
 
-                let height = Math.round(((this.simplex.noise2D(X * this.genSize, Z * this.genSize) + 2) / 2) * this.genHeight)
-                for (let y = 0; y < this.chunkDepth + height; y++) {
-                    let Y = height - y - this.genHeight - this.chunkDepth
-                    if (y == 0) {
-                        this.blocks.push({
-                            block: new Block(X, Y, Z, 2),
-                            x: X,
-                            y: Y,
-                            z: Z
-                        })
+        for (let y = 0; y < this.height; y++) {
+            let layer = []
+
+            for (let x = 0; x < this.size; x++) {
+                let row = []
+
+                for (let z = 0; z < this.size; z++) {
+                    let globalX = this.chunkX * this.size + x
+                    let globalZ = this.chunkZ * this.size + z
+
+                    // Calculate height map
+                    let height = this.noise.noise2D(globalX * this.scale, globalZ * this.scale) * this.noiseAmplitude + 62
+                    let active = y <= height
+
+                    // Calculate type of block to be added to the array
+                    if (active) {
+                        if (y < 1 + Math.round(Math.random() * 2)) {
+                            row.push(new Block(active, blockTypes.BEDROCK))
+                        } else if (y > height - 1) {
+                            row.push(new Block(active, blockTypes.GRASS))
+                        } else if (y <= height - 5 + Math.round(Math.random())) {
+                            row.push(new Block(active, blockTypes.STONE))
+                        } else {
+                            row.push(new Block(active, blockTypes.DIRT))
+                        }
+
                     } else {
-                        this.blocks.push({
-                            block: new Block(X, Y, Z, 1),
-                            x: X,
-                            y: Y,
-                            z: Z
-                        })
+                        row.push(new Block(active, blockTypes.AIR))
                     }
                 }
+
+                layer.push(row)
             }
+
+            blocks.push(layer)
+        }
+
+        return blocks
+    }
+
+    // Generates the geometry for the mesh to be rendered
+    // TODO move this back into a web worker
+    generateChunkGeometry(scene, materials) {
+        // Instantiate new worker to generate chunk geometry in worker thread
+        this.worker = new Worker('./js/chunkWorker.js')
+        this.worker.postMessage({
+            blocks: this.blocks,
+            size: this.size,
+            meta: materialMeta
+        })
+
+        // Process geometry data when received from worker
+        this.worker.onmessage = e => {
+            var loader = new THREE.BufferGeometryLoader();
+
+            // Parse geometry JSON to BufferGeometry object
+            let geoJSON = JSON.parse(e.data)
+            let geometry = loader.parse(geoJSON)
+
+            // Create and position chunk mesh
+            let mesh = new THREE.Mesh(geometry, materials)
+            mesh.position.set(this.chunkX * this.size, 0, this.chunkZ * this.size)
+
+            // add mesh to scene
+            scene.add(mesh)
         }
     }
 
-    // Generates global material for chunk
-    generateMaterial() {
-        let mats = []
-        let types = []
-        let order = []
-
-        let loader = new THREE.TextureLoader();
-        loader.setPath("../resources/textures/blocks/")
-
-        this.blocks.forEach(data => {
-            if (!types.includes(data.block.type)) {
-                types.push(data.block.type)
-                if (data.block.type == 1) {
-                    let dirt = loader.load('dirt.png')
-                    dirt.magFilter = THREE.NearestFilter
-
-                    let mat = new THREE.MeshLambertMaterial({
-                        map: dirt,
-                        side: THREE.DoubleSide
-                    })
-
-                    order.push({
-                        type: data.block.type,
-                        start: mats.length,
-                        length: 1
-                    })
-                    mats.push(mat)
-
-                }
-                if (data.block.type == 2) {
-                    let side = loader.load('grass_block_side.png')
-                    let top = loader.load('grass_block_top_green.png')
-                    let bot = loader.load('dirt.png')
-                    side.magFilter = THREE.NearestFilter
-                    top.magFilter = THREE.NearestFilter
-                    bot.magFilter = THREE.NearestFilter
-
-                    let sideMat = new THREE.MeshLambertMaterial({
-                        map: side,
-                        side: THREE.DoubleSide
-                    })
-                    let topMat = new THREE.MeshLambertMaterial({
-                        map: top,
-                        side: THREE.DoubleSide
-                    })
-                    let botMat = new THREE.MeshLambertMaterial({
-                        map: bot,
-                        side: THREE.DoubleSide
-                    })
-
-                    order.push({
-                        type: data.block.type,
-                        start: mats.length,
-                        length: 3
-                    })
-                    mats.push(sideMat, topMat, botMat)
-                }
-            }
-        })
-
-        this.materials = mats
-        this.materialsOrder = order
-    }
-
-    // Generates chunks mesh based on blocks
-    generateMesh() {
-        let matrix = new THREE.Matrix4()
+    // Generates geometry for individual blocks
+    generateBlockGeometry(x, y, z, sides) {
         let geometries = []
 
-        this.generateMaterial()
+        x -= (this.size / 2)
+        z -= (this.size / 2)
 
-        this.blocks.forEach(data => {
-            let sides = this.checkFaces(data.block.x, data.block.y, data.block.z)
+        if (!sides[0]) {
+            var pxGeometry = new THREE.PlaneGeometry(1, 1);
+            pxGeometry.rotateY(Math.PI / 2);
+            pxGeometry.translate(x + 0.5, y, z);
 
-            geometries.push(data.block.generateMesh(sides))
-        })
+            geometries.push({
+                geometry: pxGeometry,
+                side: 'px',
+                index: 1
+            })
 
-        let geometry = new THREE.Geometry()
+            pxGeometry.dispose()
+        }
+        if (!sides[1]) {
+            var nxGeometry = new THREE.PlaneGeometry(1, 1);
+            nxGeometry.rotateY(-Math.PI / 2);
+            nxGeometry.translate(x - 0.5, y, z);
 
-        // Merge geometries
-        geometries.forEach(data => {
-            // Calculate material index for face
-            let matMeta = this.materialsOrder.find(k => k.type == data.type)
-            let start = matMeta.start
-            let len = matMeta.length
+            geometries.push({
+                geometry: nxGeometry,
+                side: 'nx',
+                index: 2
+            })
 
-            if (len == 1) {
-                data.geometry.forEach(face => {
-                    geometry.merge(face.plane, matrix, start)
-                    face.plane.dispose()
-                })
-            } else if (len == 3) {
-                data.geometry.forEach(face => {
-                    if (face.side == 'py') {
-                        geometry.merge(face.plane, matrix, start + 1)
-                        face.plane.dispose()
-                    } else if (face.side == 'ny') {
-                        geometry.merge(face.plane, matrix, start + 2)
-                        face.plane.dispose()
-                    } else {
-                        geometry.merge(face.plane, matrix, start)
-                        face.plane.dispose()
-                    }
-                })
-            } else {
-                data.geometry.forEach(face => {
-                    geometry.merge(face.plane, matrix, start + (face.index - 1))
-                    face.plane.dispose()
-                })
-            }
-        })
+            nxGeometry.dispose()
+        }
 
-        geometry = new THREE.BufferGeometry().fromGeometry(geometry)
+        if (!sides[2]) {
+            var pyGeometry = new THREE.PlaneGeometry(1, 1);
+            pyGeometry.rotateX(-Math.PI / 2);
+            pyGeometry.translate(x, y + 0.5, z);
 
-        let mesh = new THREE.Mesh(geometry, this.materials);
-        this.hasMesh = true
-        this.visible = true
-        geometry.dispose()
+            geometries.push({
+                geometry: pyGeometry,
+                side: 'py',
+                index: 3
+            })
 
-        return mesh
+            pyGeometry.dispose()
+        }
+        if (!sides[3]) {
+            var nyGeometry = new THREE.PlaneGeometry(1, 1);
+            nyGeometry.rotateX(Math.PI / 2);
+            nyGeometry.translate(x, y - 0.5, z);
+
+            geometries.push({
+                geometry: nyGeometry,
+                side: 'ny',
+                index: 4
+            })
+
+            nyGeometry.dispose()
+        }
+
+        if (!sides[4]) {
+            var pzGeometry = new THREE.PlaneGeometry(1, 1);
+            pzGeometry.translate(x, y, z + 0.5);
+
+            geometries.push({
+                geometry: pzGeometry,
+                side: 'pz',
+                index: 5
+            })
+
+            pzGeometry.dispose()
+        }
+        if (!sides[5]) {
+            var nzGeometry = new THREE.PlaneGeometry(1, 1);
+            nzGeometry.rotateY(Math.PI);
+            nzGeometry.translate(x, y, z - 0.5);
+
+            geometries.push({
+                geometry: nzGeometry,
+                side: 'nz',
+                index: 6
+            })
+
+            nzGeometry.dispose()
+        }
+
+        return geometries
     }
 
-    // Checks wether block has hidden faces
-    checkFaces(x, y, z) {
-        let px = this.blocks.find(data => {
-            return data.x == x + 1 && data.y == y && data.z == z
-        })
-        let nx = this.blocks.find(data => {
-            return data.x == x - 1 && data.y == y && data.z == z
-        })
+    // Helper function that checks how many adjacent blocks are active
+    checkNeighbor(x, y, z) {
+        let px = false,
+            nx = false,
+            py = false,
+            ny = false,
+            pz = false,
+            nz = false
 
-        let py = this.blocks.find(data => {
-            return data.x == x && data.y == y + 1 && data.z == z
-        })
-        let ny = this.blocks.find(data => {
-            return data.x == x && data.y == y - 1 && data.z == z
-        })
+        if (x < this.blocks[y].length - 1) px = this.blocks[y][x + 1][z].active
+        if (x > 0) nx = this.blocks[y][x - 1][z].active
 
-        let pz = this.blocks.find(data => {
-            return data.x == x && data.y == y && data.z == z + 1
-        })
-        let nz = this.blocks.find(data => {
-            return data.x == x && data.y == y && data.z == z - 1
-        })
+        if (y < this.blocks.length - 1) py = this.blocks[y + 1][x][z].active
+        if (y > 0) ny = this.blocks[y - 1][x][z].active
 
-        let values = [typeof (px) == 'undefined', typeof (nx) == 'undefined', typeof (py) == 'undefined', typeof (ny) == 'undefined', typeof (pz) == 'undefined', typeof (nz) == 'undefined']
-        return values
+        if (z < this.blocks[y][x].length - 1) pz = this.blocks[y][x][z + 1].active
+        if (z > 0) nz = this.blocks[y][x][z - 1].active
+
+        return [px, nx, py, ny, pz, nz]
     }
 }
