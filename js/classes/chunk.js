@@ -1,8 +1,6 @@
 import * as THREE from "../packages/three.module.js"
-import {
-    blockTypes,
-    materialMeta
-} from "../config.js"
+
+import * as config from "../config.js"
 import Block from "./block.js"
 
 export default class Chunk {
@@ -14,9 +12,9 @@ export default class Chunk {
         this.scale = noiseScale
         this.noiseAmplitude = noiseAmplitude
 
-        this.size = 16
-        this.height = 256
-        this.seaLevel = 62
+        this.size = config.chunkConf.size
+        this.height = config.chunkConf.height
+        this.seaLevel = config.chunkConf.seaLevel
 
         // blocks are stored in the order [y][x][z]
         this.blocks = this.generateBlocks()
@@ -52,17 +50,17 @@ export default class Chunk {
                     // Calculate type of block to be added to the array
                     if (active) {
                         if (y < 1 + Math.round(Math.random() * 2)) {
-                            row.push(new Block(active, blockTypes.BEDROCK))
+                            row.push(new Block(active, config.blockTypes.BEDROCK))
                         } else if (y > height - 1) {
-                            row.push(new Block(active, blockTypes.GRASS))
+                            row.push(new Block(active, config.blockTypes.GRASS))
                         } else if (y <= height - 5 + Math.round(Math.random())) {
-                            row.push(new Block(active, blockTypes.STONE))
+                            row.push(new Block(active, config.blockTypes.STONE))
                         } else {
-                            row.push(new Block(active, blockTypes.DIRT))
+                            row.push(new Block(active, config.blockTypes.DIRT))
                         }
 
                     } else {
-                        row.push(new Block(active, blockTypes.AIR))
+                        row.push(new Block(active, config.blockTypes.AIR))
                     }
                 }
 
@@ -83,7 +81,7 @@ export default class Chunk {
         this.worker.postMessage({
             blocks: this.blocks,
             size: this.size,
-            meta: materialMeta
+            meta: config.materialMeta
         })
 
         // Process geometry data when received from worker

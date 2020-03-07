@@ -31,3 +31,10 @@ export const materialMeta = [{
         map: [1, 1, 0, 2, 1, 1]
     }
 ]
+
+// Chunk generation config
+export const chunkConf = {
+    size: 16,
+    height: 256,
+    seaLevel: 62
+}
