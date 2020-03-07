@@ -91,7 +91,7 @@ export default class World {
 
 
         // Base material for all solid blocks
-        let solidMat = new THREE.MeshPhongMaterial()
+        let solidMat = new THREE.MeshBasicMaterial()
 
         // Create specific materials from base
         let dirt = solidMat.clone()

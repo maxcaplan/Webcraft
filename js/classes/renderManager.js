@@ -65,24 +65,18 @@ export default class RenderManager {
         this.ambLight = new THREE.AmbientLight(this.lightCol.getHex());
         this.scene.add(this.ambLight);
 
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        this.directionalLight.position.x = 0;
-        this.directionalLight.position.y = 5;
-        this.directionalLight.position.z = 5;
-        this.directionalLight.position.normalize();
-
-        this.scene.add(this.directionalLight);
-
         // Add fog to scene
         this.scene.fog = new THREE.FogExp2(0x96D1FF, 0.008);
 
-        // let box = new THREE.BoxGeometry()
-        // let mat = new THREE.MeshPhongMaterial({
-        //     color: 0xFFFFFF
-        // })
-        // let cube = new THREE.Mesh(box, mat)
+        let box = new THREE.BoxGeometry()
+        let mat = new THREE.MeshPhongMaterial({
+            color: 0xFFFFFF
+        })
+        let cube = new THREE.Mesh(box, mat)
 
-        // this.scene.add(cube)
+        cube.position.set(0, 70, 0)
+
+        this.scene.add(cube)
 
         this.windowResize()
     }

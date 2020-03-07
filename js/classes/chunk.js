@@ -16,7 +16,7 @@ export default class Chunk {
 
         this.size = 16
         this.height = 256
-        this.groundLevel = 62
+        this.seaLevel = 62
 
         // blocks are stored in the order [y][x][z]
         this.blocks = this.generateBlocks()
@@ -39,8 +39,15 @@ export default class Chunk {
                     let globalZ = this.chunkZ * this.size + z
 
                     // Calculate height map
-                    let height = this.noise.noise2D(globalX * this.scale, globalZ * this.scale) * this.noiseAmplitude + 62
+                    let height = this.noise.noise2D(globalX * this.scale, globalZ * this.scale) * this.noiseAmplitude + this.seaLevel
                     let active = y <= height
+
+                    // Calculate caves
+                    if (y <= this.seaLevel && active) {
+                        let caveVal = this.noise.noise3D(globalX * this.scale * 2, y * this.scale * 2, globalZ * this.scale * 2)
+
+                        active = caveVal < 0.5
+                    }
 
                     // Calculate type of block to be added to the array
                     if (active) {

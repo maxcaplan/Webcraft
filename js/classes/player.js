@@ -2,11 +2,11 @@ import * as THREE from "../packages/three.module.js"
 
 export default class player {
     constructor(x = 0, y = 0, z = 0) {
-        this.object = new THREE.Object3D()
+        this.node = new THREE.Object3D()
 
-        this.object.position.x = x
-        this.object.position.y = y
-        this.object.position.z = z
+        this.node.position.x = x
+        this.node.position.y = y
+        this.node.position.z = z
 
         this.mesh
 
@@ -20,7 +20,7 @@ export default class player {
 
     constructPlayer() {
         // Create player model mesh
-        let geometry = new THREE.BoxBufferGeometry()
+        let geometry = new THREE.BoxBufferGeometry(1, 1.8, 1)
         let material = new THREE.MeshLambertMaterial({
             color: 0xFFFFFF
         })
@@ -58,9 +58,9 @@ export default class player {
         this.sunMoon.add(moonMesh)
 
         // Add objects to player object
-        this.object.add(this.mesh)
-        this.object.add(this.light)
-        this.object.add(this.sunMoon)
+        this.node.add(this.mesh)
+        this.node.add(this.light)
+        this.node.add(this.sunMoon)
     }
 
     update(camera) {
