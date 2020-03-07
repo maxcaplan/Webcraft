@@ -38,3 +38,9 @@ export const chunkConf = {
     height: 256,
     seaLevel: 62
 }
+
+export const playerConf = {
+    width: 1,
+    height: 1.75,
+    depth: 0.75,
+}

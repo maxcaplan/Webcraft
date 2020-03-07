@@ -68,16 +68,6 @@ export default class RenderManager {
         // Add fog to scene
         this.scene.fog = new THREE.FogExp2(0x96D1FF, 0.008);
 
-        let box = new THREE.BoxGeometry()
-        let mat = new THREE.MeshPhongMaterial({
-            color: 0xFFFFFF
-        })
-        let cube = new THREE.Mesh(box, mat)
-
-        cube.position.set(0, 70, 0)
-
-        this.scene.add(cube)
-
         this.windowResize()
     }
 
@@ -93,7 +83,7 @@ export default class RenderManager {
     }
 
     // Calculates sky and light based on world time (speed = days per 360 frames)
-    doDayNight(time, speed = 0.01) {
+    doDayNight(player, time, speed = 0.01) {
         const degToRad = Math.PI / 180
 
         // Map world time to scale of -1 to 1 for night to day 
@@ -118,8 +108,8 @@ export default class RenderManager {
     }
 
     // Renders the current scene
-    render(worldTime) {
-        this.doDayNight(worldTime)
+    render(worldTime, player) {
+        this.doDayNight(player, worldTime)
         this.renderer.render(this.scene, this.camera)
         this.controls.update()
     }

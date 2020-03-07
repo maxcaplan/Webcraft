@@ -20,6 +20,9 @@ export default class Chunk {
         this.blocks = this.generateBlocks()
 
         this.worker
+
+        this.mesh
+        this.activeMesh = false
     }
 
     // Creates 3D array of blocks
@@ -74,7 +77,6 @@ export default class Chunk {
     }
 
     // Generates the geometry for the mesh to be rendered
-    // TODO move this back into a web worker
     generateChunkGeometry(scene, materials) {
         // Instantiate new worker to generate chunk geometry in worker thread
         this.worker = new Worker('./js/chunkWorker.js')
@@ -93,11 +95,13 @@ export default class Chunk {
             let geometry = loader.parse(geoJSON)
 
             // Create and position chunk mesh
-            let mesh = new THREE.Mesh(geometry, materials)
-            mesh.position.set(this.chunkX * this.size, 0, this.chunkZ * this.size)
+            this.mesh = new THREE.Mesh(geometry, materials)
+            this.mesh.position.set(this.chunkX * this.size, 0, this.chunkZ * this.size)
 
             // add mesh to scene
-            scene.add(mesh)
+            scene.add(this.mesh)
+
+            this.activeMesh = true
         }
     }
 

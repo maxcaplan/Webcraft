@@ -1,13 +1,12 @@
 import * as THREE from "../packages/three.module.js"
 import "../packages/simplex-noise.js"
-import {
-    blockTypes,
-    materialMeta
-} from "../config.js"
+
+import * as config from "../config.js"
 
 import RenderManager from "./renderManager.js"
 
 import Chunk from "./chunk.js"
+import Player from "./player.js"
 
 export default class World {
     constructor(canvas) {
@@ -23,19 +22,27 @@ export default class World {
 
         this.materials = this.loadMaterials()
 
+        this.player = new Player(0, 200, 0)
+
+        this.RenderManager.scene.add(this.player.node)
+
         // FPS counter
         this.stats = new Stats()
         this.stats.showPanel(0)
         document.body.appendChild(this.stats.dom)
 
-        let tempWorldSize = 5
+        // TODO: Move chunks into a chunk manager
+        this.chunks = []
+
+        let tempWorldSize = 2
         for (let x = 0; x < tempWorldSize; x++) {
             for (let z = 0; z < tempWorldSize; z++) {
                 let testChunk = new Chunk(x, z, this.simplex, 0.02, 10)
                 testChunk.generateChunkGeometry(this.RenderManager.scene, this.materials)
+
+                this.chunks.push(testChunk)
             }
         }
-
     }
 
     // Main game loop
@@ -45,7 +52,9 @@ export default class World {
         if (!this.pause) {
             this.worldTime += 1
 
-            this.RenderManager.render(this.worldTime)
+            this.player.update(this.RenderManager.camera, this.chunks)
+
+            this.RenderManager.render(this.worldTime, this.player)
         }
 
         this.stats.end()
