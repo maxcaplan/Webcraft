@@ -89,7 +89,7 @@ export default class World {
         let bedrockText = loader.load('bedrock.png')
         bedrockText.magFilter = THREE.NearestFilter
 
-        let grassTopText = loader.load('grass_block_top_green.png')
+        let grassTopText = loader.load('grass_block_top.png')
         grassTopText.magFilter = THREE.NearestFilter
 
         let grassSideText = loader.load('grass_block_side.png')
@@ -100,7 +100,9 @@ export default class World {
 
 
         // Base material for all solid blocks
-        let solidMat = new THREE.MeshBasicMaterial()
+        let solidMat = new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide
+        })
 
         // Create specific materials from base
         let dirt = solidMat.clone()
