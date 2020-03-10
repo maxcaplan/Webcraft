@@ -27,8 +27,12 @@ export default class player {
         this.sunMoon
 
         // Physics
-        this.GRAVITY = 0.2
-        this.MAXFALLSPEED = 1
+        this.GRAVITY = config.playerConf.GRAVITY
+        this.MAXFALLSPEED = config.playerConf.MAXFALLSPEED
+        this.JUMPSPEED = config.playerConf.JUMPSPEED
+        this.MOVESPEED = config.playerConf.MOVESPEED
+        this.MAXMOVESPEED = config.playerConf.MAXMOVESPEED
+
         this.velocity = {
             x: 0,
             y: 0,
@@ -38,6 +42,15 @@ export default class player {
         this.direction = 0
 
         this.grounded = false
+
+        // Array to keep track of input keys
+        this.keys = {
+            w: false,
+            a: false,
+            s: false,
+            d: false,
+            space: false
+        }
 
         this.constructPlayer()
     }
@@ -56,6 +69,16 @@ export default class player {
 
         // Create collision raycaster
         this.rayCaster = new THREE.Raycaster(this.node.position, new THREE.Vector3(0, -1, 0))
+
+        // Attach capture functions to key events
+        let that = this;
+        window.onkeydown = function (e) {
+            that.captureKeyDown(e)
+        }
+
+        window.onkeyup = function (e) {
+            that.captureKeyUp(e)
+        }
 
         // // Create sun and moon axis
         // this.sunMoon = new THREE.Object3D()
@@ -91,9 +114,51 @@ export default class player {
         // this.node.add(this.sunMoon)
     }
 
+    // Updates key state on keydown event
+    captureKeyDown(event) {
+        let key = event.key
+        if(key == " ") key = "space"
+        // Check if key is used for input
+        if (this.keys[key] != undefined) {
+            // Update key state
+            this.keys[key] = true
+        }
+    }
+    // Updates key state on keyUp event
+    captureKeyUp(event) {
+        let key = event.key
+        if(key == " ") key = "space"
+        // Check if key is used for input
+        if (this.keys[key] != undefined) {
+            // Update key state
+            this.keys[key] = false
+        }
+    }
+
     // Applies movement input to player physics
     move() {
-        return
+        // Jump
+        if (this.keys.space) {
+            if (this.grounded) this.velocity.y = this.JUMPSPEED
+        }
+
+        // Move forward
+        if (this.keys.w) {
+            this.node.position.z += this.MOVESPEED
+        }
+        // Move backwards
+        if (this.keys.s) {
+            this.node.position.z -= this.MOVESPEED
+        }
+
+        // Move left
+        if (this.keys.a) {
+            this.node.position.x += this.MOVESPEED
+        }
+        // Move right
+        if (this.keys.d) {
+            this.node.position.x -= this.MOVESPEED
+        }
     }
 
     // Checks if player is colliding with an active block
@@ -114,8 +179,8 @@ export default class player {
 
         // Check which chunk the player is in
         let chunkPos = {
-            x: playerPos.x / config.chunkConf.size,
-            z: playerPos.z / config.chunkConf.size
+            x: Math.round(playerPos.x / config.chunkConf.size),
+            z: Math.round(playerPos.z / config.chunkConf.size)
         }
 
         let currentChunk = chunks.find(chunk => {
@@ -129,9 +194,11 @@ export default class player {
         if (castColls.length > 0) {
             // If collided with ground remove y velocity
             if (castColls[0].distance <= config.playerConf.height / 2) {
-                this.grounded = true
-                if (this.velocity.y != 0) this.velocity.y = 0
-                this.node.position.y = castColls[0].point.y + (config.playerConf.height / 2)
+                if (!this.grounded && this.velocity != 0) {
+                    this.grounded = true
+                    this.velocity.y = 0
+                    this.node.position.y = castColls[0].point.y + (config.playerConf.height / 2)
+                }
             } else {
                 this.grounded = false
             }
@@ -142,6 +209,9 @@ export default class player {
 
     // Updates player physics each frame
     update(camera, chunks, checkColls = true) {
+        // Get player input
+        this.move()
+
         // Check collisions before calculating physics
         let collisions
         if (checkColls) collisions = this.checkCollisions(chunks)
@@ -161,7 +231,7 @@ export default class player {
         this.acceleration = 0
 
         // Add gravity to velocity
-        if(!this.grounded) this.velocity.y -= this.GRAVITY
+        if (!this.grounded) this.velocity.y -= this.GRAVITY
 
         // Clamp -y velocity to the max fall speed
         if (this.velocity.y < -this.MAXFALLSPEED) this.velocity.y = -this.MAXFALLSPEED

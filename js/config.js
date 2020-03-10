@@ -40,7 +40,12 @@ export const chunkConf = {
 }
 
 export const playerConf = {
-    width: 1,
+    width: 0.75,
     height: 1.75,
     depth: 0.75,
+    GRAVITY: 0.04,
+    MAXFALLSPEED: 1,
+    JUMPSPEED: 0.35,
+    MOVESPEED: 0.1,
+    MAXMOVESPEED: 0.5
 }
