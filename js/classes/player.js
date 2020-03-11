@@ -117,7 +117,7 @@ export default class player {
     // Updates key state on keydown event
     captureKeyDown(event) {
         let key = event.key
-        if(key == " ") key = "space"
+        if (key == " ") key = "space"
         // Check if key is used for input
         if (this.keys[key] != undefined) {
             // Update key state
@@ -127,7 +127,7 @@ export default class player {
     // Updates key state on keyUp event
     captureKeyUp(event) {
         let key = event.key
-        if(key == " ") key = "space"
+        if (key == " ") key = "space"
         // Check if key is used for input
         if (this.keys[key] != undefined) {
             // Update key state
@@ -164,9 +164,12 @@ export default class player {
     // Checks if player is colliding with an active block
     checkCollisions(chunks) {
         let collisions = {
-            x: false,
-            y: false,
-            z: false
+            px: false,
+            nx: false,
+            py: false,
+            ny: false,
+            pz: false,
+            nz: false
         }
 
         let playerPos = {
@@ -177,19 +180,73 @@ export default class player {
 
         this.rayCaster.set(new THREE.Vector3(playerPos.x, playerPos.y, playerPos.z), new THREE.Vector3(0, -1, 0))
 
-        // Check which chunk the player is in
-        let chunkPos = {
+        // Check which chunks to check collisions for
+        let colChunks = []
+        let chunkLocalPos = {
             x: Math.round(playerPos.x / config.chunkConf.size),
             z: Math.round(playerPos.z / config.chunkConf.size)
         }
 
+        // Get chunk the player is in
         let currentChunk = chunks.find(chunk => {
-            return chunk.chunkX == chunkPos.x && chunk.chunkZ == chunkPos.z
+            return chunk.chunkX == chunkLocalPos.x && chunk.chunkZ == chunkLocalPos.z
         })
+
+        if(currentChunk != undefined) colChunks.push(currentChunk)
+
+        // Get adjacent chunks
+        if (colChunks.length > 0) {
+            // If player is to the left of the current chunk
+            if (colChunks[0].chunkX - playerPos.x < 0) {
+                let adjChunk = chunks.find(chunk => {
+                    return chunk.chunkX == chunkLocalPos.x + 1 && chunk.chunkZ == chunkLocalPos.z
+                })
+                if(adjChunk != undefined) colChunks.push(adjChunk)
+            }
+            // If player is to the right of the current chunk
+            if (colChunks[0].chunkX - playerPos.x > 0) {
+                let adjChunk = chunks.find(chunk => {
+                    return chunk.chunkX == chunkLocalPos.x - 1 && chunk.chunkZ == chunkLocalPos.z
+                })
+                if(adjChunk != undefined) colChunks.push(adjChunk)
+            }
+            // If player is to the back of the current chunk
+            if (colChunks[0].chunkZ - playerPos.z < 0) {
+                let adjChunk = chunks.find(chunk => {
+                    return chunk.chunkX == chunkLocalPos.x && chunk.chunkZ == chunkLocalPos.z + 1
+                })
+                if(adjChunk != undefined) colChunks.push(adjChunk)
+            }
+            // If player is to the right of the current chunk
+            if (colChunks[0].chunkZ - playerPos.z > 0) {
+                let adjChunk = chunks.find(chunk => {
+                    return chunk.chunkX == chunkLocalPos.x && chunk.chunkZ == chunkLocalPos.z - 1
+                })
+                if(adjChunk != undefined) colChunks.push(adjChunk)
+            }
+        }
+
+        // If there is no chunks to collide with, don't check collisions
+        if(colChunks.length <= 0) {
+            this.grounded = false
+            return
+        }
+
+        // Only check chunks that have a generated mesh
+        let colMeshes = colChunks.filter(chunk => {
+            return chunk.mesh != undefined
+        })
+
+        // 
+        colMeshes = colMeshes.map(chunk => {
+            return chunk.mesh
+        })
+
+        // console.log(colMeshes)
 
         // Cast a ray downwards to see if player has collided with the ground
         let castColls = []
-        if (currentChunk && currentChunk.activeMesh) castColls = this.rayCaster.intersectObject(currentChunk.mesh)
+        if (colMeshes.length > 0) castColls = this.rayCaster.intersectObjects(colMeshes)
 
         if (castColls.length > 0) {
             // If collided with ground remove y velocity

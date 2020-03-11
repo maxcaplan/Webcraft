@@ -37,7 +37,7 @@ export default class World {
         let tempWorldSize = 2
         for (let x = 0; x < tempWorldSize; x++) {
             for (let z = 0; z < tempWorldSize; z++) {
-                let testChunk = new Chunk(x, z, this.simplex, 0.02, 10)
+                let testChunk = new Chunk(x, z, this.simplex, 0.02, 2)
                 testChunk.generateChunkGeometry(this.RenderManager.scene, this.materials)
 
                 this.chunks.push(testChunk)
