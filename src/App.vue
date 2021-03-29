@@ -5,10 +5,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 
 @Component({})
-export default class App extends Vue {}
+export default class App extends Vue {
+  private themes = { LIGHT: "light", DARK: "dark" };
+  private theme = "light";
+
+  @Watch("theme")
+  themeChanged() {
+    this.toggleTheme();
+  }
+
+  public toggleTheme(): void {
+    this.theme =
+      this.theme === this.themes.LIGHT ? this.themes.DARK : this.themes.LIGHT;
+  }
+}
 </script>
 
 <style lang="scss">

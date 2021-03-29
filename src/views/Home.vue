@@ -3,17 +3,9 @@
     <h1>Webcraft Redux</h1>
 
     <div class="menu-wrapper px-3 mb-3 mb-lg-5">
-      <div class="d-grid gap-2">
-        <button class="btn btn-primary d-block btn-lg">
-          Start <i class="bi bi-play-fill"></i>
-        </button>
-        <button class="btn btn-secondary d-block btn-lg">
-          Settings <i class="bi bi-gear-fill"></i>
-        </button>
-        <button class="btn btn-info d-block btn-lg">
-          Info <i class="bi bi-question-circle-fill"></i>
-        </button>
-      </div>
+      <transition :name="transitionName" mode="out-in">
+        <router-view></router-view>
+      </transition>
 
       <hr />
 
@@ -21,7 +13,10 @@
         <div class="col">
           <p class="m-0">
             Created by:
-            <a class="text-decoration-none" href="#"
+            <a
+              class="text-decoration-none"
+              href="https://github.com/maxcaplan"
+              target="_blank"
               >Max Caplan <i class="bi bi-github text-dark"></i
             ></a>
           </p>
@@ -31,10 +26,33 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "Home",
-};
+<script lang="ts">
+import { Component, Vue, Watch } from "vue-property-decorator";
+@Component({})
+export default class Home extends Vue {
+  private transitionNames = {
+    LEFT: "slide-left",
+    RIGHT: "slide-right",
+    DEFAULT: "default",
+  };
+  private transitionName = this.transitionNames.DEFAULT;
+
+  @Watch("$route", { immediate: true, deep: true })
+  onRouteChange(to: any, from: any) {
+    if (!from) {
+      this.transitionName = this.transitionNames.DEFAULT;
+    } else {
+      const toDepth = to.path.split("/").filter(function (i: string) {
+        return i;
+      }).length;
+      const fromDepth = from.path.split("/").filter(function (i: string) {
+        return i;
+      }).length;
+
+      this.transitionName = toDepth < fromDepth ? "slide-right" : "slide-left";
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -50,6 +68,33 @@ export default {
   position: absolute;
   bottom: 0;
   left: 0;
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.25s ease;
+}
+
+.slide-left-enter {
+  transform: translateX(2rem);
+  opacity: 0;
+}
+
+.slide-left-leave-to {
+  transform: translateX(-2rem);
+  opacity: 0;
+}
+
+.slide-right-enter {
+  transform: translateX(-2rem);
+  opacity: 0;
+}
+
+.slide-right-leave-to {
+  transform: translateX(2rem);
+  opacity: 0;
 }
 </style>
 
